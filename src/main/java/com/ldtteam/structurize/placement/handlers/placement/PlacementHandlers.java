@@ -34,7 +34,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.locks.Lock;
 
 import static com.ldtteam.structurize.api.constants.Constants.UPDATE_FLAG;
 
