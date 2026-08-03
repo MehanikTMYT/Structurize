@@ -2,6 +2,7 @@ package com.ldtteam.structurize.blocks.schematic;
 
 import com.ldtteam.structurize.items.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
@@ -72,7 +73,7 @@ public class BlockSubstitution extends Block implements LiquidBlockContainer
     }
 
     @Override
-    public boolean canPlaceLiquid(@Nullable Player player, BlockGetter level, BlockPos pos, BlockState state, Fluid fluid)
+    public boolean canPlaceLiquid(@Nullable LivingEntity user, BlockGetter level, BlockPos pos, BlockState state, Fluid fluid)
     {
         // Don't allow water to flow inside despite being non-solid
         return false;

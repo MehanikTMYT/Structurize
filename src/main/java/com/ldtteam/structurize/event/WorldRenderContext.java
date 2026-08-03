@@ -14,7 +14,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent.Stage;
+import net.minecraft.util.profiling.Profiler;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 import java.util.List;
 import java.util.Map;
@@ -27,19 +28,22 @@ public class WorldRenderContext extends WorldRenderMacros
     static final WorldRenderContext INSTANCE = new WorldRenderContext();
 
     @Override
-    protected void renderWithinContext(final Stage stage)
+    protected void renderWithinContext(final RenderLevelStageEvent stageEvent)
     {
         final double alpha = Structurize.getConfig().getClient().rendererTransparency.get();
         final boolean isAlphaApplied = alpha > 0 && alpha < TransparencyHack.THRESHOLD;
 
-        final Stage when = isAlphaApplied ? Stage.AFTER_TRANSLUCENT_BLOCKS : Stage.AFTER_BLOCK_ENTITIES;
-        // otherwise even worse sorting issues arise
-        if (stage == when)
+        // PORT-26.1.2: closest equivalents of the removed Stage.AFTER_TRANSLUCENT_BLOCKS/AFTER_BLOCK_ENTITIES;
+        // otherwise even worse sorting issues arise. Verify timing in-game.
+        final boolean atBlueprintStage = isAlphaApplied
+            ? stageEvent instanceof RenderLevelStageEvent.AfterTranslucentBlocks
+            : stageEvent instanceof RenderLevelStageEvent.AfterOpaqueFeatures;
+        if (atBlueprintStage)
         {
             renderBlueprints();
         }
 
-        if (stage == WorldRenderMacros.STAGE_FOR_LINES)
+        if (WorldRenderMacros.isStageForLines(stageEvent))
         {
             renderBoxes();
             renderTagTool();
@@ -54,11 +58,11 @@ public class WorldRenderContext extends WorldRenderMacros
 
             if (blueprint != null)
             {
-                mc.getProfiler().push("struct_render");
+                Profiler.get().push("struct_render");
 
                 renderBlueprint(previewData, previewData.getPos());
 
-                mc.getProfiler().pop();
+                Profiler.get().pop();
             }
         }
     }
@@ -73,7 +77,7 @@ public class WorldRenderContext extends WorldRenderMacros
             {
                 final BlockPos anchor = blueprint.getPrimaryBlockOffset();
 
-                mc.getProfiler().push("struct_render");
+                Profiler.get().push("struct_render");
                 pushPoseCameraToPos(previewData.getPos().subtract(anchor));
 
                 renderWhiteLineBox(BlockPos.ZERO,
@@ -82,7 +86,7 @@ public class WorldRenderContext extends WorldRenderMacros
                 renderRedGlintLineBox(anchor, anchor, DEFAULT_LINE_WIDTH);
 
                 popPose();
-                mc.getProfiler().pop();
+                Profiler.get().pop();
             }
         }
 
@@ -90,7 +94,7 @@ public class WorldRenderContext extends WorldRenderMacros
         {
             final BlockPos root = previewData.pos1();
 
-            mc.getProfiler().push("struct_box");
+            Profiler.get().push("struct_box");
             pushPoseCameraToPos(root);
 
             // Used to render a red box around a scan's Primary offset (primary block)
@@ -98,7 +102,7 @@ public class WorldRenderContext extends WorldRenderMacros
             previewData.anchor().map(pos -> pos.subtract(root)).ifPresent(pos -> renderRedGlintLineBox(pos, pos, DEFAULT_LINE_WIDTH));
 
             popPose();
-            mc.getProfiler().pop();
+            Profiler.get().pop();
         }
     }
 
@@ -112,7 +116,7 @@ public class WorldRenderContext extends WorldRenderMacros
             final BlockPos tagAnchor = tags.anchorPos().get();
             final BlockEntity te = player.level().getBlockEntity(tagAnchor);
 
-            mc.getProfiler().push("struct_tags");
+            Profiler.get().push("struct_tags");
             pushPoseCameraToPos(tagAnchor);
 
             if (te instanceof final IBlueprintDataProviderBE blueprintProvider)
@@ -129,7 +133,7 @@ public class WorldRenderContext extends WorldRenderMacros
             renderRedGlintLineBox(BlockPos.ZERO, BlockPos.ZERO, DEFAULT_LINE_WIDTH);
 
             popPose();
-            mc.getProfiler().pop();
+            Profiler.get().pop();
         }
     }
 }

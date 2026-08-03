@@ -77,8 +77,8 @@ public class UpdateSchematicPackCommand extends AbstractCommand
                         final CompoundTag nbt = NbtIo.readCompressed(inputStream, NbtAccounter.unlimitedHeap());
                         inputStream.close();
 
-                        int currentDataVersion = SharedConstants.getCurrentVersion().getDataVersion().getVersion();
-                        final int oldDataVersion = nbt.contains("mcversion") ? nbt.getInt("mcversion") : DEFAULT_FIXER_IF_NOT_FOUND;
+                        int currentDataVersion = SharedConstants.getCurrentVersion().dataVersion().version();
+                        final int oldDataVersion = nbt.contains("mcversion") ? nbt.getIntOr("mcversion", 0) : DEFAULT_FIXER_IF_NOT_FOUND;
 
                         if (oldDataVersion != currentDataVersion)
                         {

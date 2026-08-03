@@ -8,7 +8,12 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -100,9 +105,9 @@ public class ChangeStorage
     public void addEntities(final List<Entity> list, final HolderLookup.Provider provider)
     {
         list.stream().map(entity -> {
-            final CompoundTag tag = new CompoundTag();
-            entity.save(tag);
-            return tag;
+            final TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, provider);
+            entity.save(output);
+            return output.buildResult();
         }).forEach(removedEntities::add);
     }
 
@@ -169,18 +174,15 @@ public class ChangeStorage
 
         for (final CompoundTag data : removedEntities)
         {
-            final Optional<EntityType<?>> type = EntityType.by(data);
-            if (type.isPresent())
+            final ValueInput input = TagValueInput.create(ProblemReporter.DISCARDING, world.registryAccess(), data);
+            final Optional<Entity> createdEntity = EntityType.create(input, world, EntitySpawnReason.LOAD);
+            if (createdEntity.isPresent())
             {
-                final Entity entity = type.get().create(world);
-                if (entity != null)
+                final Entity entity = createdEntity.get();
+                world.addFreshEntity(entity);
+                if (undoStorage != null)
                 {
-                    entity.load(data);
-                    world.addFreshEntity(entity);
-                    if (undoStorage != null)
-                    {
-                        undoStorage.addedEntities.add(entity);
-                    }
+                    undoStorage.addedEntities.add(entity);
                 }
             }
         }

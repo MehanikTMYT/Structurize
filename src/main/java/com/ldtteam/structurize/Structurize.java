@@ -62,7 +62,7 @@ public class Structurize
         modBus.register(LifecycleSubscriber.class);
         forgeBus.register(EventSubscriber.class);
 
-        if (FMLEnvironment.dist.isClient())
+        if (FMLEnvironment.getDist().isClient())
         {
             modBus.register(ClientLifecycleSubscriber.class);
             forgeBus.register(ClientEventSubscriber.class);
@@ -82,7 +82,7 @@ public class Structurize
             {
                 throw new RuntimeException("You are trying to run old mod on much newer vanilla. Missing some newest data versions. Please update com/ldtteam/structures/blueprints/v1/DataVersion");
             }
-            else if (!FMLEnvironment.production && DataVersion.CURRENT == DataVersion.UPCOMING)
+            else if (!FMLEnvironment.isProduction() && DataVersion.CURRENT == DataVersion.UPCOMING)
             {
                 throw new RuntimeException("Missing some newest data versions. Please update src/main/java/com/ldtteam/structurize/blueprints/v1/DataVersion.java");
             }

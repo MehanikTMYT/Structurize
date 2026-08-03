@@ -1,6 +1,5 @@
 package com.ldtteam.structurize.datagen;
 
-import com.ldtteam.structurize.api.constants.Constants;
 import com.ldtteam.structurize.tag.ModTags;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -9,8 +8,6 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.IntrinsicHolderTagsProvider;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -20,10 +17,9 @@ public class EntityTagProvider extends IntrinsicHolderTagsProvider<EntityType<?>
 {
     public EntityTagProvider(final PackOutput output,
         final ResourceKey<? extends Registry<EntityType<?>>> key,
-        final CompletableFuture<Provider> future,
-        @Nullable final ExistingFileHelper existingFileHelper)
+        final CompletableFuture<Provider> future)
     {
-        super(output, key, future, k -> BuiltInRegistries.ENTITY_TYPE.getResourceKey(k).get(), Constants.MOD_ID, existingFileHelper);
+        super(output, key, future, k -> BuiltInRegistries.ENTITY_TYPE.getResourceKey(k).get());
     }
 
     @Override

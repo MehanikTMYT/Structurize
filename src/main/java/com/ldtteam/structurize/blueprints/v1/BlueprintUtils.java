@@ -6,15 +6,20 @@ import com.ldtteam.structurize.api.Log;
 import com.ldtteam.structurize.util.BlockEntityInfo;
 import com.ldtteam.structurize.util.BlockInfo;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.neoforged.neoforge.model.data.ModelData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.UUIDUtil;
 import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +91,7 @@ public final class BlueprintUtils
     {
         if (info == null || info.getTileEntityData() == null) return null;
 
-        final String entityId = info.getTileEntityData().getString("id");
+        final String entityId = info.getTileEntityData().getStringOr("id", "");
 
         try
         {
@@ -125,31 +130,28 @@ public final class BlueprintUtils
     {
         if (info == null) return null;
 
-        final String entityId = info.getString("id");
+        final String entityId = info.getStringOr("id", "");
 
         try
         {
             final CompoundTag compound = info.copy();
-            compound.putUUID("UUID", UUID.randomUUID());
-            final Optional<EntityType<?>> type = EntityType.by(compound);
-            if (type.isPresent())
-            {    
-                final Entity entity = type.get().create(entityLevel);
-    
-                if (entity != null)
+            compound.store("UUID", UUIDUtil.CODEC, UUID.randomUUID());
+            final ValueInput input = TagValueInput.create(ProblemReporter.DISCARDING, entityLevel.registryAccess(), compound);
+            final Optional<Entity> entity = EntityType.create(input, entityLevel, EntitySpawnReason.LOAD);
+
+            if (entity.isPresent())
+            {
+                final Entity theEntity = entity.get();
+
+                // prevent ticking rotations
+                theEntity.setOldPosAndRot();
+                if (theEntity instanceof LivingEntity lentity)
                 {
-                    entity.load(compound);
-
-                    // prevent ticking rotations
-                    entity.setOldPosAndRot();
-                    if (entity instanceof LivingEntity lentity)
-                    {
-                        lentity.yHeadRotO = lentity.yHeadRot;
-                        lentity.yBodyRotO = lentity.yBodyRot;
-                    }
-
-                    return entity;
+                    lentity.yHeadRotO = lentity.yHeadRot;
+                    lentity.yBodyRotO = lentity.yBodyRot;
                 }
+
+                return theEntity;
             }
             return null;
         }

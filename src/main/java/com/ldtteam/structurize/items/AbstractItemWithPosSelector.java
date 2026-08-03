@@ -14,7 +14,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
@@ -67,7 +66,7 @@ public abstract class AbstractItemWithPosSelector extends Item
      * {@inheritDoc}
      */
     @Override
-    public InteractionResultHolder<ItemStack> use(final Level worldIn, final Player playerIn, final InteractionHand handIn)
+    public InteractionResult use(final Level worldIn, final Player playerIn, final InteractionHand handIn)
     {
         final ItemStack itemstack = playerIn.getItemInHand(handIn);
         final PosSelection compound = PosSelection.readFromItemStack(itemstack);
@@ -76,28 +75,26 @@ public abstract class AbstractItemWithPosSelector extends Item
         {
             if (worldIn.isClientSide())
             {
-                playerIn.displayClientMessage(Component.translatable(MISSING_POS_TKEY + "1"), false);
+                playerIn.sendSystemMessage(Component.translatable(MISSING_POS_TKEY + "1"));
             }
-            return InteractionResultHolder.fail(itemstack);
+            return InteractionResult.FAIL;
         }
 
         if (compound.endPos().isEmpty())
         {
             if (worldIn.isClientSide())
             {
-                playerIn.displayClientMessage(Component.translatable(MISSING_POS_TKEY + "2"), false);
+                playerIn.sendSystemMessage(Component.translatable(MISSING_POS_TKEY + "2"));
             }
-            return InteractionResultHolder.fail(itemstack);
+            return InteractionResult.FAIL;
         }
 
-        return new InteractionResultHolder<>(
-            onAirRightClick(
+        return onAirRightClick(
                 compound.startPos().get(),
                 compound.endPos().get(),
                 worldIn,
                 playerIn,
-                itemstack),
-            itemstack);
+                itemstack);
     }
 
     /**
@@ -110,7 +107,7 @@ public abstract class AbstractItemWithPosSelector extends Item
         final BlockPos pos = context.getClickedPos();
         if (context.getLevel().isClientSide())
         {
-            context.getPlayer().displayClientMessage(Component.translatable(END_POS_TKEY, pos.getX(), pos.getY(), pos.getZ()), false);
+            context.getPlayer().sendSystemMessage(Component.translatable(END_POS_TKEY, pos.getX(), pos.getY(), pos.getZ()));
             Utils.playSuccessSound(context.getPlayer());
         }
         PosSelection.updateItemStack(context.getItemInHand(), data -> data.setEndpos(pos));
@@ -118,11 +115,13 @@ public abstract class AbstractItemWithPosSelector extends Item
     }
 
     /**
-     * Structurize: Prevent block breaking server side.
-     * {@inheritDoc}
+     * PORT-26.1.2: {@code Item#canAttackBlock(BlockState, Level, BlockPos, Player)} was removed; the equivalent hook
+     * is now {@link net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock}, dispatched from
+     * {@link com.ldtteam.structurize.event.EventSubscriber#onLeftClickBlock}, which calls this method and suppresses
+     * both block-attack and item-mining via {@code setUseBlock(TriState.FALSE)}/{@code setUseItem(TriState.FALSE)}.
+     * Structurize: Prevent block breaking server side; captures the start pos instead.
      */
-    @Override
-    public boolean canAttackBlock(final BlockState state, final Level worldIn, final BlockPos pos, final Player player)
+    public void onLeftClickBlock(final BlockPos pos, final Player player)
     {
         ItemStack itemstack = player.getMainHandItem();
         if (!itemstack.getItem().equals(getRegisteredItemInstance()))
@@ -130,12 +129,11 @@ public abstract class AbstractItemWithPosSelector extends Item
             itemstack = player.getOffhandItem();
         }
         PosSelection.updateItemStack(itemstack, data -> data.setStartPos(pos));
-        if (player.getCommandSenderWorld().isClientSide())
+        if (player.level().isClientSide())
         {
             Utils.playSuccessSound(player);
-            player.displayClientMessage(Component.translatable(START_POS_TKEY, pos.getX(), pos.getY(), pos.getZ()), false);
+            player.sendSystemMessage(Component.translatable(START_POS_TKEY, pos.getX(), pos.getY(), pos.getZ()));
         }
-        return false;
     }
 
     /**

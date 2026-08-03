@@ -1,31 +1,33 @@
 package com.ldtteam.structurize.client;
 
-import com.ldtteam.common.fakelevel.SingleBlockFakeLevel;
 import com.ldtteam.structurize.blockentities.BlockEntityTagSubstitution;
-import com.ldtteam.structurize.component.CapturedBlock;
-import com.ldtteam.structurize.items.ItemTagSubstitution;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.client.NeoForgeRenderTypes;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tag anchor renderer; renders replacement block model inside of anchor "overlay" model.
+ *
+ * PORT-26.1.2: block-entity rendering was redesigned around a two-phase "extract render state, then submit to a
+ * {@link SubmitNodeCollector}" model ({@link BlockEntityRenderer#extractRenderState}/{@link BlockEntityRenderer#submit},
+ * replacing the old direct {@code render(...)} call this class used) and {@code BlockEntityWithoutLevelRenderer}
+ * plus {@code IClientItemExtensions#getCustomRenderer()} (used for the held/GUI item preview) were removed
+ * outright, with custom item rendering moving to the new {@code ItemModel}/{@code ItemStackRenderState} pipeline.
+ * Re-implementing both against these unfamiliar, untested APIs was out of scope for this port; see
+ * PORT_26.1.2.md. The captured replacement block is still stored/serialized correctly
+ * ({@link BlockEntityTagSubstitution}) - only its in-world and held-item visual rendering is affected.
  */
-public class TagSubstitutionRenderer extends BlockEntityWithoutLevelRenderer implements BlockEntityRenderer<BlockEntityTagSubstitution>
+public class TagSubstitutionRenderer implements BlockEntityRenderer<BlockEntityTagSubstitution, BlockEntityRenderState>
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TagSubstitutionRenderer.class);
+    private static boolean hasWarned = false;
+
     private static TagSubstitutionRenderer INSTANCE;
 
     public static TagSubstitutionRenderer getInstance()
@@ -33,98 +35,27 @@ public class TagSubstitutionRenderer extends BlockEntityWithoutLevelRenderer imp
         return INSTANCE;
     }
 
-
-    private final BlockEntityRendererProvider.Context context;
-    private SingleBlockFakeLevel renderLevel;
-
     public TagSubstitutionRenderer(@NotNull final BlockEntityRendererProvider.Context context)
     {
-        super(context.getBlockEntityRenderDispatcher(), context.getModelSet());
-
         INSTANCE = this;
-        this.context = context;
     }
 
     @Override
-    public void render(@NotNull final BlockEntityTagSubstitution entity,
-                       final float partialTick,
-                       @NotNull final PoseStack poseStack,
-                       @NotNull final MultiBufferSource buffers,
-                       final int packedLight,
-                       final int packedOverlay)
+    public BlockEntityRenderState createRenderState()
     {
-        final RenderType renderType = NeoForgeRenderTypes.ITEM_LAYERED_TRANSLUCENT.get();
-
-        render(entity.getReplacement(), entity.getTilePos(), partialTick, poseStack, buffers, packedLight, packedOverlay, renderType);
+        return new BlockEntityRenderState();
     }
 
     @Override
-    public void renderByItem(@NotNull final ItemStack stack,
-                             @NotNull final ItemDisplayContext transformType,
-                             @NotNull final PoseStack poseStack,
-                             @NotNull final MultiBufferSource buffers,
-                             final int packedLight,
-                             final int packedOverlay)
+    public void submit(final BlockEntityRenderState state, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final CameraRenderState camera)
     {
-        final RenderType renderType = NeoForgeRenderTypes.ITEM_LAYERED_TRANSLUCENT.get();
-
-        if (stack.getItem() instanceof ItemTagSubstitution anchor)
+        if (!hasWarned)
         {
-            this.context.getBlockRenderDispatcher().renderSingleBlock(anchor.getBlock().defaultBlockState(),
-                    poseStack, buffers, packedLight, packedOverlay, ModelData.EMPTY, renderType);
-
-            render(CapturedBlock.readFromItemStack(stack), BlockPos.ZERO, 0, poseStack, buffers, packedLight, packedOverlay, renderType);
+            hasWarned = true;
+            LOGGER.warn("Tag substitution replacement-block rendering is temporarily disabled after the 26.1.2 port: "
+                + "block-entity rendering now uses an extract-render-state-then-submit model this port could not "
+                + "safely reimplement without in-game verification. See PORT_26.1.2.md. Placement, scanning and "
+                + "the stored replacement data are unaffected.");
         }
-    }
-
-    private void render(@NotNull final CapturedBlock replacement,
-                        @NotNull final BlockPos pos,
-                        final float partialTick,
-                        @NotNull PoseStack poseStack,
-                        @NotNull MultiBufferSource buffers,
-                        final int packedLight,
-                        final int packedOverlay,
-                        @NotNull final RenderType renderType)
-    {
-        if (replacement.blockState().isAir())
-        {
-            return;
-        }
-
-        poseStack.pushPose();
-        poseStack.scale(0.995f, 0.995f, 0.995f);
-        poseStack.translate(0.0025f, 0.0025f, 0.0025f);
-
-        if (replacement.hasBlockEntity())
-        {
-            final BlockEntityRenderDispatcher entityDispatcher = this.context.getBlockEntityRenderDispatcher();
-            final Level realLevel = entityDispatcher.level;
-            if (renderLevel == null)
-            {
-                renderLevel = new SingleBlockFakeLevel(realLevel);
-            }
-
-            renderLevel.withFakeLevelContext(replacement.blockState(),
-                BlockEntity.loadStatic(BlockPos.ZERO, replacement.blockState(), replacement.serializedBE().get(), realLevel.registryAccess()),
-                realLevel,
-                fakeLevel -> {
-                    context.getBlockRenderDispatcher()
-                        .renderSingleBlock(replacement.blockState(),
-                            poseStack,
-                            buffers,
-                            packedLight,
-                            packedOverlay,
-                            renderLevel.getLevelSource().blockEntity.getModelData(),
-                            renderType);
-                    entityDispatcher.render(renderLevel.getLevelSource().blockEntity, partialTick, poseStack, buffers);
-                });
-        }
-        else
-        {
-            context.getBlockRenderDispatcher()
-                .renderSingleBlock(replacement.blockState(), poseStack, buffers, packedLight, packedOverlay, ModelData.EMPTY, renderType);
-        }
-
-        poseStack.popPose();
     }
 }

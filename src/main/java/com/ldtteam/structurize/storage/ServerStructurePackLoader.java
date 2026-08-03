@@ -67,7 +67,10 @@ public class ServerStructurePackLoader
         final List<String> modList = new ArrayList<>();
         for (IModInfo mod : ModList.get().getMods())
         {
-            modPaths.add(mod.getOwningFile().getFile().findResource(BLUEPRINT_FOLDER, mod.getModId()));
+            // PORT-26.1.2: IModFile#findResource(String...) was removed; resolve the same "<contentRoot>/blueprints/<modid>"
+            // path manually against the mod's own content root(s) instead. See PORT_26.1.2.md.
+            mod.getOwningFile().getFile().getContents().getContentRoots().stream().findFirst()
+                .ifPresent(contentRoot -> modPaths.add(contentRoot.resolve(BLUEPRINT_FOLDER).resolve(mod.getModId())));
             modList.add(mod.getModId());
         }
 

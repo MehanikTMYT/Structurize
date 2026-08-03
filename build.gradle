@@ -1,1 +1,28 @@
-apply from: 'https://raw.githubusercontent.com/ldtteam/OperaPublicaCreator/ng7/gradle/mod.gradle'
+apply from: findProperty('opcScript') ?: 'https://raw.githubusercontent.com/ldtteam/OperaPublicaCreator/ng7/gradle/mod.gradle'
+
+
+// PORT-26.1.2: use locally published BlockUI and Domum Ornamentum.
+repositories {
+    mavenLocal()
+}
+
+// PORT-26.1.2: surface the full error set per compile task instead of javac's default 100-error cutoff.
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-Xdiags:verbose' << '-Xmaxerrs' << '5000' << '-Xmaxwarns' << '5000'
+}
+
+// PORT-26.1.2: the custom "structurize:overlaid" model geometry loader (OverlaidGeometry/OverlaidBakedModel/
+// OverlaidModelLoader) targets the pre-26.1.2 IUnbakedGeometry/IGeometryLoader model-baking API, which NeoForge
+// replaced with an UnbakedGeometry/BlockStateModel/QuadCollection pipeline in this version. It is an isolated,
+// optional visual integration (used only by blocktagsubstitution.json, purely to force isCustomRenderer() on
+// that one baked model) and not required for scanning/tagging/placement logic. Excluded here pending a proper
+// re-implementation against the new model-baking API; see PORT_26.1.2.md.
+sourceSets {
+    main {
+        java {
+            exclude 'com/ldtteam/structurize/client/model/OverlaidGeometry.java'
+            exclude 'com/ldtteam/structurize/client/model/OverlaidBakedModel.java'
+            exclude 'com/ldtteam/structurize/client/model/OverlaidModelLoader.java'
+        }
+    }
+}

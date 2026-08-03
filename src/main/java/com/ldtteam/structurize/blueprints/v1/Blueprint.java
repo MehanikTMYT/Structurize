@@ -24,8 +24,13 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -173,7 +178,7 @@ public class Blueprint implements IFakeLevelBlockGetter
         {
             if (te != null)
             {
-                this.tileEntities[te.getShort("y")][te.getShort("z")][te.getShort("x")] = te;
+                this.tileEntities[te.getShortOr("y", (short) 0)][te.getShortOr("z", (short) 0)][te.getShortOr("x", (short) 0)] = te;
             }
         }
         this.requiredMods = requiredMods;
@@ -721,7 +726,7 @@ public class Blueprint implements IFakeLevelBlockGetter
                         //       Level with blockstate and entity and the former requires reinflating everything
                         //       before we can test whether it's rotatable or not, neither of which is ideal.  So
                         //       for now this is the minimal requirement.
-                        if (compound.getString("id").equals(ModBlockEntities.TAG_SUBSTITUTION.getId().toString()))
+                        if (compound.getStringOr("id", "").equals(ModBlockEntities.TAG_SUBSTITUTION.getId().toString()))
                         {
                             CapturedBlock replacement = BlockEntityTagSubstitution.deserializeReplacement(compound, dynamicNbtOps);
                             replacement = replacement.applyRotationMirror(transformBy, level);
@@ -730,7 +735,7 @@ public class Blueprint implements IFakeLevelBlockGetter
 
                         if (compound.contains(TAG_BLUEPRINTDATA))
                         {
-                            CompoundTag dataCompound = compound.getCompound(TAG_BLUEPRINTDATA);
+                            CompoundTag dataCompound = compound.getCompoundOrEmpty(TAG_BLUEPRINTDATA);
 
                             // Rotate tag map
                             final Map<BlockPos, List<String>> tagPosMap = IBlueprintDataProviderBE.readTagPosMapFrom(dataCompound);
@@ -790,28 +795,28 @@ public class Blueprint implements IFakeLevelBlockGetter
         final BlockPos pos,
         final RotationMirror rotationMirror)
     {
-        final Optional<EntityType<?>> type = EntityType.by(entityInfo);
+        final ValueInput input = TagValueInput.create(ProblemReporter.DISCARDING, world.registryAccess(), entityInfo);
+        final Optional<EntityType<?>> type = EntityType.by(input);
         if (type.isPresent())
         {
-            final Entity finalEntity = type.get().create(world);
+            final Optional<Entity> createdEntity = EntityType.create(type.get(), input, world, EntitySpawnReason.STRUCTURE);
 
-            if (finalEntity != null)
+            if (createdEntity.isPresent())
             {
+                final Entity finalEntity = createdEntity.get();
                 try
                 {
-                    finalEntity.load(entityInfo);
-
                     final Vec3 entityVec = rotationMirror
                         .applyToPos(
                             finalEntity instanceof HangingEntity hang ? Vec3.atCenterOf(hang.getPos()) : finalEntity.position())
                         .add(Vec3.atLowerCornerOf(pos));
                     finalEntity.setYRot(finalEntity.mirror(rotationMirror.mirror()));
                     finalEntity.setYRot(finalEntity.rotate(rotationMirror.rotation()));
-                    finalEntity.moveTo(entityVec.x, entityVec.y, entityVec.z, finalEntity.getYRot(), finalEntity.getXRot());
+                    finalEntity.snapTo(entityVec.x, entityVec.y, entityVec.z, finalEntity.getYRot(), finalEntity.getXRot());
 
-                    final CompoundTag newEntityInfo = new CompoundTag();
-                    finalEntity.save(newEntityInfo);
-                    return newEntityInfo;
+                    final TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, world.registryAccess());
+                    finalEntity.save(output);
+                    return output.buildResult();
                 }
                 catch (final Exception ex)
                 {
@@ -890,10 +895,10 @@ public class Blueprint implements IFakeLevelBlockGetter
      */
     private static boolean isAtPos(final CompoundTag entityData, final BlockPos pos)
     {
-        final ListTag list = entityData.getList(ENTITY_POS, 6);
-        final int x = (int) list.getDouble(0);
-        final int y = (int) list.getDouble(1);
-        final int z = (int) list.getDouble(2);
+        final ListTag list = entityData.getListOrEmpty(ENTITY_POS);
+        final int x = (int) list.getDoubleOr(0, 0.0);
+        final int y = (int) list.getDoubleOr(1, 0.0);
+        final int z = (int) list.getDoubleOr(2, 0.0);
         return new BlockPos(x, y, z).equals(pos);
     }
 

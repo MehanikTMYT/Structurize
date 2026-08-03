@@ -1,6 +1,6 @@
 package com.ldtteam.structurize.api.constants;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 
 import java.util.Random;
@@ -38,9 +38,9 @@ public final class Constants
      */
     public static final String LOCAL = "Local";
 
-    public static ResourceLocation resLocStruct(final String path)
+    public static Identifier resLocStruct(final String path)
     {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
     /**

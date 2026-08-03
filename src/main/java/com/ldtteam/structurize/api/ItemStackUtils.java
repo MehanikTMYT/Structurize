@@ -17,10 +17,12 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.EntityHitResult;
-import net.neoforged.neoforge.capabilities.Capabilities.ItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities.Item;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -62,7 +64,7 @@ public final class ItemStackUtils
             return List.of();
         }
 
-        final BlockPos blockpos = new BlockPos(compound.getInt("x"), compound.getInt("y"), compound.getInt("z"));
+        final BlockPos blockpos = new BlockPos(compound.getIntOr("x", 0), compound.getIntOr("y", 0), compound.getIntOr("z", 0));
         final BlockEntity tileEntity = BlockEntity.loadStatic(blockpos, state, compound, level.registryAccess());
         if (tileEntity == null)
         {
@@ -93,9 +95,20 @@ public final class ItemStackUtils
             if (!ItemStackUtils.isEmpty(stack))
             {
                 sink.accept(stack);
-                    deepExtractItemHandler(stack.getCapability(ItemHandler.ITEM), sink);
+                deepExtractItemHandler(toItemHandler(stack.getCapability(Item.ITEM, ItemAccess.forStack(stack))), sink);
             }
         }
+    }
+
+    /**
+     * PORT-26.1.2: {@code Capabilities.Item.*} now yield {@code ResourceHandler<ItemResource>} instead of
+     * {@link IItemHandler}; bridge back to the still-supported (deprecated) {@link IItemHandler} API via
+     * {@link IItemHandler#of(ResourceHandler)} so the rest of this class can keep using it unchanged.
+     */
+    @Nullable
+    private static IItemHandler toItemHandler(@Nullable final ResourceHandler<ItemResource> handler)
+    {
+        return handler == null ? null : IItemHandler.of(handler);
     }
 
     /**
@@ -122,7 +135,7 @@ public final class ItemStackUtils
             return Set.of(new InvWrapper(container));
         }
 
-        final IItemHandler unsidedItemHandler = provider.getLevel().getCapability(ItemHandler.BLOCK, pos, state, provider, null);
+        final IItemHandler unsidedItemHandler = toItemHandler(provider.getLevel().getCapability(Item.BLOCK, pos, state, provider, null));
         if (unsidedItemHandler != null)
         {
             // weak assumption of unsided being partial view only
@@ -132,7 +145,7 @@ public final class ItemStackUtils
         final Set<IItemHandler> handlerSet = new HashSet<>();
         for (final Direction side : Direction.values())
         {
-            final IItemHandler cap = provider.getLevel().getCapability(ItemHandler.BLOCK, pos, state, provider, side);
+            final IItemHandler cap = toItemHandler(provider.getLevel().getCapability(Item.BLOCK, pos, state, provider, side));
             if (cap != null)
             {
                 handlerSet.add(cap);
@@ -238,12 +251,12 @@ public final class ItemStackUtils
         }
         if (itemHandler == null)
         {
-            itemHandler = entity.getCapability(ItemHandler.ENTITY);
+            itemHandler = toItemHandler(entity.getCapability(Item.ENTITY));
         }
         if (itemHandler == null)
         {
             // weak assumption of unsided being partial view only
-            itemHandler = entity.getCapability(ItemHandler.ENTITY_AUTOMATION, null);
+            itemHandler = toItemHandler(entity.getCapability(Item.ENTITY_AUTOMATION, null));
         }
 
         if (itemHandler != null)
@@ -255,19 +268,19 @@ public final class ItemStackUtils
         {
             final ItemStack stack = itemFrame.getItem();
             entityContent.add(stack);
-            deepExtractItemHandler(stack.getCapability(ItemHandler.ITEM), entityContent::add);
+            deepExtractItemHandler(toItemHandler(stack.getCapability(Item.ITEM, ItemAccess.forStack(stack))), entityContent::add);
         }
         else if (entity instanceof final ItemEntity itemEntity)
         {
             final ItemStack stack = itemEntity.getItem();
             entityContent.add(stack);
-            deepExtractItemHandler(stack.getCapability(ItemHandler.ITEM), entityContent::add);
+            deepExtractItemHandler(toItemHandler(stack.getCapability(Item.ITEM, ItemAccess.forStack(stack))), entityContent::add);
         }
         else // sided item handler
         {
             for (final Direction side : Direction.values())
             {
-                final IItemHandler cap = entity.getCapability(ItemHandler.ENTITY_AUTOMATION, side);
+                final IItemHandler cap = toItemHandler(entity.getCapability(Item.ENTITY_AUTOMATION, side));
                 if (cap != null)
                 {
                     deepExtractItemHandler(cap, entityContent::add);
@@ -288,7 +301,7 @@ public final class ItemStackUtils
         {
             return itemFrame.getFrameItemStack();
         }
-        return entity.getPickedResult(new EntityHitResult(entity));
+        return entity.getPickResult();
     }
 
     /**

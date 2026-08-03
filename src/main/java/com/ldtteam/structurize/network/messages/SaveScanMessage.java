@@ -42,8 +42,8 @@ public class SaveScanMessage extends AbstractClientPlayMessage
         try (ByteBufInputStream stream = new ByteBufInputStream(buffer))
         {
             final CompoundTag wrapperCompound = NbtIo.read(stream, NbtAccounter.unlimitedHeap());
-            tag = wrapperCompound.getCompound(TAG_SCHEMATIC);
-            name = wrapperCompound.getString(TAG_MILLIS);
+            tag = wrapperCompound.getCompoundOrEmpty(TAG_SCHEMATIC);
+            name = wrapperCompound.getStringOr(TAG_MILLIS, "");
         }
         catch (final RuntimeException e)
         {

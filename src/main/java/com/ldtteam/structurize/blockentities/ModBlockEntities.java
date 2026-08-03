@@ -14,5 +14,5 @@ public final class ModBlockEntities
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, Constants.MOD_ID);
 
     public static DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityTagSubstitution>> TAG_SUBSTITUTION = BLOCK_ENTITIES.register("tagsubstitution",
-      () -> BlockEntityType.Builder.of(BlockEntityTagSubstitution::new, ModBlocks.blockTagSubstitution.get()).build(null));
+      () -> new BlockEntityType<>(BlockEntityTagSubstitution::new, ModBlocks.blockTagSubstitution.get()));
 }

@@ -48,7 +48,7 @@ public class ItemUtil
             }
         }
 
-        for (final ItemStack stack : Minecraft.getInstance().player.getInventory().items)
+        for (final ItemStack stack : Minecraft.getInstance().player.getInventory().getNonEquipmentItems())
         {
             final Item item = stack.getItem();
             if (item instanceof AirItem || item instanceof BlockItem || (item instanceof BucketItem

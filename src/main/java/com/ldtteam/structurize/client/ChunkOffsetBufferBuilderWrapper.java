@@ -76,6 +76,12 @@ public class ChunkOffsetBufferBuilderWrapper implements VertexConsumer
     }
 
     @Override
+    public VertexConsumer setLineWidth(float width)
+    {
+        return delegate.setLineWidth(width);
+    }
+
+    @Override
     public void addVertex(float x,
         float y,
         float z,

@@ -10,7 +10,6 @@ import com.ldtteam.structurize.placement.handlers.placement.PlacementHandlers;
 import com.ldtteam.structurize.storage.ServerStructurePackLoader;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -83,10 +82,15 @@ public class LifecycleSubscriber
     @SubscribeEvent
     public static void onDatagen(@NotNull final GatherDataEvent event)
     {
-        final DataGenerator generator = event.getGenerator();
-        generator.addProvider(event.includeServer(), new BlockEntityTagProvider(event.getGenerator().getPackOutput(), Registries.BLOCK_ENTITY_TYPE, event.getLookupProvider(), event.getExistingFileHelper()));
-        generator.addProvider(event.includeServer(), new BlockTagProvider(event.getGenerator().getPackOutput(), Registries.BLOCK, event.getLookupProvider(), event.getExistingFileHelper()));
-        generator.addProvider(event.includeClient(), new EntityTagProvider(event.getGenerator().getPackOutput(), Registries.ENTITY_TYPE, event.getLookupProvider(), event.getExistingFileHelper()));
+        if (event instanceof GatherDataEvent.Server)
+        {
+            event.addProvider(new BlockEntityTagProvider(event.getGenerator().getPackOutput(), Registries.BLOCK_ENTITY_TYPE, event.getLookupProvider()));
+            event.addProvider(new BlockTagProvider(event.getGenerator().getPackOutput(), Registries.BLOCK, event.getLookupProvider()));
+        }
+        if (event instanceof GatherDataEvent.Client)
+        {
+            event.addProvider(new EntityTagProvider(event.getGenerator().getPackOutput(), Registries.ENTITY_TYPE, event.getLookupProvider()));
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -95,7 +99,7 @@ public class LifecycleSubscriber
         final Set<Block> containerBlocks = Collections.newSetFromMap(new IdentityHashMap<>());
         for (final Block block : BuiltInRegistries.BLOCK)
         {
-            if (event.isBlockRegistered(Capabilities.ItemHandler.BLOCK, block))
+            if (event.isBlockRegistered(Capabilities.Item.BLOCK, block))
             {
                 containerBlocks.add(block);
             }

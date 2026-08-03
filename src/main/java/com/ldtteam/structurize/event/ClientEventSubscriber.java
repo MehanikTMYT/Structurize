@@ -15,9 +15,11 @@ import com.ldtteam.structurize.storage.rendering.types.BoxPreviewData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.util.profiling.Profiler;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut;
@@ -71,13 +73,13 @@ public class ClientEventSubscriber
     public static void onClientTickEvent(final ClientTickEvent.Post event)
     {
         final Minecraft mc = Minecraft.getInstance();
-        mc.getProfiler().push("structurize");
+        Profiler.get().push("structurize");
 
         if (mc.level != null && mc.level.getGameTime() % (Constants.TICKS_SECOND * BlueprintHandler.CACHE_EXPIRE_CHECK_SECONDS) == 0)
         {
-            mc.getProfiler().push("blueprint_manager_tick");
+            Profiler.get().push("blueprint_manager_tick");
             BlueprintHandler.getInstance().cleanCache();
-            mc.getProfiler().pop();
+            Profiler.get().pop();
         }
 
         if (ModKeyMappings.TELEPORT.get().consumeClick() && mc.level != null && mc.player != null &&
@@ -89,7 +91,7 @@ public class ClientEventSubscriber
             }
         }
 
-        mc.getProfiler().pop();
+        Profiler.get().pop();
     }
 
     @SubscribeEvent
@@ -106,16 +108,16 @@ public class ClientEventSubscriber
                 pos = null;
             }
 
-            final ItemStack current = mc.player.getInventory().getSelected();
+            final ItemStack current = mc.player.getInventory().getSelectedItem();
             if (current.getItem() instanceof ISpecialBlockPickItem clickableItem)
             {
-                final boolean ctrlKey = Screen.hasControlDown();
+                final boolean ctrlKey = mc.hasControlDown();
                 switch (clickableItem.onBlockPick(mc.player, current, pos, ctrlKey))
                 {
-                    case PASS:
+                    case InteractionResult.Pass ignored:
                         ++mc.options.keyPickItem.clickCount;
                         break;
-                    case FAIL:
+                    case InteractionResult.Fail ignored:
                         break;
                     default:
                         new ItemMiddleMouseMessage(pos, ctrlKey).sendToServer();
@@ -145,15 +147,15 @@ public class ClientEventSubscriber
         if (event.isCanceled() || mc.player == null || mc.screen != null || mc.level == null) return;
         if (!mc.player.isShiftKeyDown()) return;
 
-        final ItemStack current = mc.player.getInventory().getSelected();
+        final ItemStack current = mc.player.getInventory().getSelectedItem();
         if (current.getItem() instanceof IScrollableItem scrollableItem)
         {
-            final boolean ctrlKey = Screen.hasControlDown();
+            final boolean ctrlKey = mc.hasControlDown();
             switch (scrollableItem.onMouseScroll(mc.player, current, event.getScrollDeltaX(), event.getScrollDeltaY(), ctrlKey))
             {
-                case PASS:
+                case InteractionResult.Pass ignored:
                     break;
-                case FAIL:
+                case InteractionResult.Fail ignored:
                     event.setCanceled(true);
                     break;
                 default:

@@ -1,5 +1,6 @@
 package com.ldtteam.structurize.client.gui;
 
+import org.lwjgl.glfw.GLFW;
 import com.ldtteam.blockui.Color;
 import com.ldtteam.blockui.Pane;
 import com.ldtteam.blockui.controls.*;
@@ -25,6 +26,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -207,7 +209,7 @@ public class WindowScan extends AbstractWindowSkeleton
         }
         catch (Exception e)
         {
-            Minecraft.getInstance().player.displayClientMessage(Component.literal("Invalid Number"), false);
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Invalid Number"));
         }
         close();
     }
@@ -361,18 +363,18 @@ public class WindowScan extends AbstractWindowSkeleton
     }
 
     @Override
-    public boolean onUnhandledKeyTyped(final int ch, final int key)
+    public boolean onUnhandledKeyTyped(final net.minecraft.client.input.KeyEvent event)
     {
-        if (ch >= '0' && ch <= '9')
+        if (event.key() >= GLFW.GLFW_KEY_0 && event.key() <= GLFW.GLFW_KEY_9)
         {
             updateBounds();
-            data = data.moveTo(ch - '0');
+            data = data.moveTo(event.key() - GLFW.GLFW_KEY_0);
             loadSlot();
             updateResources();
             return true;
         }
 
-        return super.onUnhandledKeyTyped(ch, key);
+        return super.onUnhandledKeyTyped(event);
     }
 
     private void loadSlot()
@@ -424,7 +426,7 @@ public class WindowScan extends AbstractWindowSkeleton
         }
         catch (final NumberFormatException e)
         {
-            Minecraft.getInstance().player.displayClientMessage(Component.literal("Invalid Number"), false);
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Invalid Number"));
             return;
         }
 
@@ -551,7 +553,7 @@ public class WindowScan extends AbstractWindowSkeleton
         }
 
         if (filter.isEmpty()
-            || res.getDescriptionId().toLowerCase(Locale.US).contains(filter.toLowerCase(Locale.US))
+            || res.getItem().getDescriptionId().toLowerCase(Locale.US).contains(filter.toLowerCase(Locale.US))
             || res.getHoverName().getString().toLowerCase(Locale.US).contains(filter.toLowerCase(Locale.US)))
         {
             final ItemStorage stackToStore = new ItemStorage(res, 1, true, false);
@@ -595,7 +597,7 @@ public class WindowScan extends AbstractWindowSkeleton
             public void updateElement(final int index, final Pane rowPane)
             {
                 final EntityType<?> entity = tempEntities.get(index);
-                ItemStack entityIcon = entity.create(Minecraft.getInstance().level).getPickResult();
+                ItemStack entityIcon = entity.create(Minecraft.getInstance().level, EntitySpawnReason.TRIGGERED).getPickResult();
                 if (entity == EntityType.GLOW_ITEM_FRAME)
                 {
                     entityIcon = new ItemStack(Items.GLOW_ITEM_FRAME);

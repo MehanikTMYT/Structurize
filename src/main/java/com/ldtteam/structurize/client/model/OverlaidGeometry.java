@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
 import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
 import java.util.function.Function;
@@ -14,9 +14,9 @@ import java.util.function.Function;
  */
 public class OverlaidGeometry implements IUnbakedGeometry<OverlaidGeometry>
 {
-    private ResourceLocation overlayModelId;
+    private Identifier overlayModelId;
 
-    public OverlaidGeometry(final ResourceLocation overlayModelId)
+    public OverlaidGeometry(final Identifier overlayModelId)
     {
         this.overlayModelId = overlayModelId;
     }

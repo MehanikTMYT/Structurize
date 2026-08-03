@@ -3,7 +3,11 @@ dependencies {
 
     implementation "com.ldtteam:domum-ornamentum:${project.domumOrnamentumVersion}"
 
-    implementation (("com.ldtteam:datagenerators:${project.dataGeneratorsVersion}:universal")) {
-        transitive = false
+    // PORT-26.1.2: the legacy DataGenerators artifact targets older
+    // Minecraft APIs. Restore a compatible publication with datagen.
+    if (project.findProperty('usesDatagen')?.toString()?.toBoolean()) {
+        implementation (("com.ldtteam:datagenerators:${project.dataGeneratorsVersion}:universal")) {
+            transitive = false
+        }
     }
 }

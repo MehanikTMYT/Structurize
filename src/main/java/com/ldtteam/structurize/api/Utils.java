@@ -30,7 +30,7 @@ public final class Utils
      */
     public static void playSuccessSound(@NotNull final Player player)
     {
-        player.playNotifySound(SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.NEUTRAL, 1.0f, 1.0f);
+        player.level().playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.NEUTRAL, 1.0f, 1.0f);
     }
 
     /**
@@ -39,7 +39,7 @@ public final class Utils
      */
     public static void playErrorSound(@NotNull final Player player)
     {
-        player.playNotifySound(SoundEvents.NOTE_BLOCK_DIDGERIDOO.value(), SoundSource.NEUTRAL, 1.0f, 0.3f);
+        player.level().playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_DIDGERIDOO.value(), SoundSource.NEUTRAL, 1.0f, 0.3f);
     }
 
     /**
@@ -63,7 +63,7 @@ public final class Utils
      */
     public static boolean nbtContains(final CompoundTag originTag, final CompoundTag compareTag)
     {
-        for (final String childTagKey : originTag.getAllKeys())
+        for (final String childTagKey : originTag.keySet())
         {
             final Tag originChildTag = originTag.get(childTagKey);
             final Tag compareChildTag = compareTag.get(childTagKey);

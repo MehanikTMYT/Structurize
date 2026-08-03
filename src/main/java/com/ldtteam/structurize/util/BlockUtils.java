@@ -44,6 +44,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.status.ChunkPyramid;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.status.ChunkStep;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.level.levelgen.blending.Blender;
@@ -173,7 +174,7 @@ public final class BlockUtils
                     chunk,
                     chunk.getOrCreateNoiseChunk(c -> createNoiseBiome(serverLevel, chunkGenerator, c)),
                     serverLevel.getBiomeManager()::getBiome,
-                    serverLevel.registryAccess().registryOrThrow(Registries.BIOME),
+                    serverLevel.registryAccess().lookupOrThrow(Registries.BIOME),
                     new WorldGenerationContext(chunkGenerator, serverLevel));
 
                 final int locX = location.getX();
@@ -185,7 +186,7 @@ public final class BlockUtils
                 int waterHeight = Integer.MIN_VALUE;
 
                 final MutableBlockPos temp = new MutableBlockPos(locX, locY, locZ);
-                for (int tempY = locY + 1; tempY <= chunk.getMaxBuildHeight() + 1; ++tempY)
+                for (int tempY = locY + 1; tempY <= chunk.getMaxY() + 2; ++tempY)
                 {
                     temp.setY(tempY);
                     final BlockState bs = virtualBlocks == null ? chunk.getBlockState(temp) :
@@ -204,7 +205,7 @@ public final class BlockUtils
                     }
                 }
 
-                for (int tempY = locY - 1; tempY >= chunk.getMinBuildHeight() - 1; --tempY)
+                for (int tempY = locY - 1; tempY >= chunk.getMinY() - 1; --tempY)
                 {
                     temp.setY(tempY);
                     final BlockState bs = virtualBlocks == null ? chunk.getBlockState(temp) :
@@ -226,7 +227,7 @@ public final class BlockUtils
             else if (generator instanceof FlatLevelSource chunkGenerator)
             {
                 final List<BlockState> layers = chunkGenerator.settings().getLayers();
-                final int locY = location.getY() - serverLevel.getMinBuildHeight();
+                final int locY = location.getY() - serverLevel.getMinY();
                 if (locY >= 0 && locY < layers.size())
                 {
                     return layers.get(locY);
@@ -271,7 +272,7 @@ public final class BlockUtils
         }
         else if (block instanceof CropBlock)
         {
-            final ItemStack stack = ((CropBlock) block).getCloneItemStack(null, null, blockState);
+            final ItemStack stack = ((CropBlock) block).getCloneItemStack(null, null, blockState, false, null);
             if (stack != null)
             {
                 return stack.getItem();
@@ -280,7 +281,7 @@ public final class BlockUtils
             return Items.WHEAT_SEEDS;
         }
         // oh no... 
-        else if (block instanceof FarmBlock || block instanceof DirtPathBlock)
+        else if (block instanceof FarmlandBlock || block instanceof DirtPathBlock)
         {
             return getItemFromBlock(Blocks.DIRT);
         }
@@ -606,7 +607,8 @@ public final class BlockUtils
                 }
             }
         }
-        return world == null || !world.dimensionType().ultraWarm() ? Blocks.WATER.defaultBlockState() : Blocks.LAVA.defaultBlockState();
+        return world == null || !world.environmentAttributes().getDimensionValue(EnvironmentAttributes.WATER_EVAPORATES)
+            ? Blocks.WATER.defaultBlockState() : Blocks.LAVA.defaultBlockState();
     }
 
     /**
@@ -687,8 +689,8 @@ public final class BlockUtils
         private OurWorldGenRegion(final ServerLevel level, final ChunkStep step, final ChunkAccess chunk)
         {
             super(level, null, step, chunk);
-            final int chunkX = chunk.getPos().x;
-            final int chunkZ = chunk.getPos().z;
+            final int chunkX = chunk.getPos().x();
+            final int chunkZ = chunk.getPos().z();
             final int chunkRange = step.accumulatedDependencies().getRadius();
 
             this.level = level;
@@ -753,10 +755,10 @@ public final class BlockUtils
         @Override
         public boolean isOldChunkAround(ChunkPos pos, int radius)
         {
-            final int minX = pos.x - radius;
-            final int maxX = pos.x + radius;
-            final int minZ = pos.z - radius;
-            final int maxZ = pos.z + radius;
+            final int minX = pos.x() - radius;
+            final int maxX = pos.x() + radius;
+            final int minZ = pos.z() - radius;
+            final int maxZ = pos.z() + radius;
 
             return chunks.contains(minX, minZ) &&
                 chunks.contains(minX, maxZ) &&
@@ -815,7 +817,7 @@ public final class BlockUtils
     public static boolean canBlockSurviveWithoutSupport(final Block block)
     {
         // TODO: add tag
-        if (block instanceof FarmBlock || block instanceof DirtPathBlock)
+        if (block instanceof FarmlandBlock || block instanceof DirtPathBlock)
         {
             return true;
         }

@@ -88,7 +88,7 @@
 
   "com.structurize.gui.buildtool.leave.tip": "Right-click the build tool on a solid block to adjust the build's position",
   "com.structurize.gui.buildtool.tip": "Press ESC to leave the GUI to inspect the preview",
-  "key.structurize.categories.general": "Structurize",
+  "key.category.structurize.general": "Structurize",
   "key.structurize.teleport": "Scan Tool Teleport",
   "key.structurize.move_forward": "Move Forward",
   "key.structurize.move_back": "Move Back",

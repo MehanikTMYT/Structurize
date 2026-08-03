@@ -1,20 +1,16 @@
 package com.ldtteam.structurize.event;
 
 import com.ldtteam.structurize.blockentities.ModBlockEntities;
-import com.ldtteam.structurize.blocks.ModBlocks;
 import com.ldtteam.structurize.client.*;
 import com.ldtteam.structurize.api.Log;
 import com.ldtteam.structurize.api.constants.Constants;
-import com.ldtteam.structurize.client.model.OverlaidModelLoader;
 import com.ldtteam.structurize.items.ItemStackTooltip;
 import com.ldtteam.structurize.items.ModItems;
 import com.ldtteam.structurize.placement.handlers.placement.PlacementHandlers.ContainerPlacementHandler;
 import com.ldtteam.structurize.storage.ClientStructurePackLoader;
 import com.ldtteam.structurize.util.WorldRenderMacros;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -25,15 +21,11 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.capabilities.Capabilities.ItemHandler;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 public class ClientLifecycleSubscriber
 {
@@ -44,9 +36,9 @@ public class ClientLifecycleSubscriber
     }
 
     @SubscribeEvent
-    public static void onRegisterReloadListeners(final RegisterClientReloadListenersEvent event)
+    public static void onRegisterReloadListeners(final AddClientReloadListenersEvent event)
     {
-        event.registerReloadListener(new SimplePreparableReloadListener<>()
+        event.addListener(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "blueprint_renderer_cache"), new SimplePreparableReloadListener<>()
         {
             @Override
             protected Object prepare(final ResourceManager manager, final ProfilerFiller profiler)
@@ -63,18 +55,11 @@ public class ClientLifecycleSubscriber
         });
     }
 
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public static void doClientStuff(final EntityRenderersEvent.RegisterRenderers event)
-    {
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.blockSubstitution.get(), RenderType.translucent());
-    }
+    // PORT-26.1.2: ItemBlockRenderTypes.setRenderLayer(...) was removed; per-block render type is now declared
+    // declaratively via "render_type" in the block model JSON (see blocksubstitution.json).
 
-    @SubscribeEvent
-    public static void registerGeometry(final ModelEvent.RegisterGeometryLoaders event)
-    {
-        event.register(Constants.resLocStruct("overlaid"), new OverlaidModelLoader());
-    }
+    // PORT-26.1.2: "structurize:overlaid" geometry loader registration removed along with
+    // OverlaidGeometry/OverlaidBakedModel/OverlaidModelLoader; see PORT_26.1.2.md.
 
     @SubscribeEvent
     public static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
@@ -100,16 +85,8 @@ public class ClientLifecycleSubscriber
         WorldRenderMacros.RenderTypes.registerBuffer(event);
     }
 
-    @SubscribeEvent
-    public static void registerClientExtensions(final RegisterClientExtensionsEvent event)
-    {
-        event.registerItem(new IClientItemExtensions()
-        {
-            @Override
-            public BlockEntityWithoutLevelRenderer getCustomRenderer()
-            {
-                return TagSubstitutionRenderer.getInstance();
-            }
-        }, ModItems.blockTagSubstitution.get());
-    }
+    // PORT-26.1.2: IClientItemExtensions#getCustomRenderer()/BlockEntityWithoutLevelRenderer were removed;
+    // custom held/GUI item rendering now goes through the new ItemModel/ItemStackRenderState pipeline instead.
+    // Re-registering the tag-substitution tool's custom item renderer against that API was out of scope for
+    // this port; see PORT_26.1.2.md and TagSubstitutionRenderer.
 }

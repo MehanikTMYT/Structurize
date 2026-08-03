@@ -7,6 +7,7 @@ import com.ldtteam.structurize.component.ModDataComponents;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -18,6 +19,8 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -128,28 +131,37 @@ public class BlockEntityTagSubstitution extends BlockEntity implements IBlueprin
     }
 
     @Override
-    public void loadAdditional( @NotNull final CompoundTag compound, final HolderLookup.Provider provider)
+    public void loadAdditional( @NotNull final ValueInput input)
     {
-        super.loadAdditional(compound, provider);
-        final DynamicOps<Tag> dynamicOps = provider.createSerializationContext(NbtOps.INSTANCE);
+        super.loadAdditional(input);
+        final HolderLookup.Provider provider = input.lookup();
 
-        IBlueprintDataProviderBE.super.readSchematicDataFromNBT(compound);
-        if (compound.contains(CAPTURED_BLOCK_TAG_OLD, Tag.TAG_COMPOUND))
+        final CompoundTag blueprintDataWrapper = new CompoundTag();
+        input.read(IBlueprintDataProviderBE.TAG_BLUEPRINTDATA, CompoundTag.CODEC)
+            .ifPresent(blueprintData -> blueprintDataWrapper.put(IBlueprintDataProviderBE.TAG_BLUEPRINTDATA, blueprintData));
+        IBlueprintDataProviderBE.super.readSchematicDataFromNBT(blueprintDataWrapper);
+
+        final Optional<CompoundTag> oldNbtOpt = input.read(CAPTURED_BLOCK_TAG_OLD, CompoundTag.CODEC);
+        if (oldNbtOpt.isPresent())
         {
-            final CompoundTag oldNbt = compound.getCompound(CAPTURED_BLOCK_TAG_OLD);
-            replacement = new CapturedBlock(NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), oldNbt.getCompound("b")),
-                Optional.of(oldNbt.getCompound("e")),
-                oldNbt.contains("i") ? ItemStack.parseOptional(provider, oldNbt.getCompound("i")) : ItemStack.EMPTY);
+            final CompoundTag oldNbt = oldNbtOpt.get();
+            replacement = new CapturedBlock(NbtUtils.readBlockState(BuiltInRegistries.BLOCK, oldNbt.getCompoundOrEmpty("b")),
+                Optional.of(oldNbt.getCompoundOrEmpty("e")),
+                oldNbt.contains("i")
+                    ? ItemStack.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), oldNbt.getCompoundOrEmpty("i"))
+                        .resultOrPartial(error -> Log.getLogger().warn("Failed to parse legacy captured item: " + error))
+                        .orElse(ItemStack.EMPTY)
+                    : ItemStack.EMPTY);
         }
         else
         {
-            replacement = deserializeReplacement(compound, dynamicOps);
+            replacement = input.read(CAPTURED_BLOCK_TAG, CapturedBlock.CODEC).orElse(CapturedBlock.EMPTY);
         }
     }
 
     public static CapturedBlock deserializeReplacement(final CompoundTag compound, final DynamicOps<Tag> dynamicOps)
     {
-        if (compound.getCompound(CAPTURED_BLOCK_TAG).isEmpty())
+        if (compound.getCompoundOrEmpty(CAPTURED_BLOCK_TAG).isEmpty())
         {
             return CapturedBlock.EMPTY;
         }
@@ -161,14 +173,16 @@ public class BlockEntityTagSubstitution extends BlockEntity implements IBlueprin
     }
 
     @Override
-    public void saveAdditional(@NotNull final CompoundTag compound, final HolderLookup.Provider provider)
+    public void saveAdditional(@NotNull final ValueOutput output)
     {
-        super.saveAdditional(compound, provider);
-        final DynamicOps<Tag> dynamicOps = provider.createSerializationContext(NbtOps.INSTANCE);
-        writeSchematicDataToNBT(compound);
+        super.saveAdditional(output);
+
+        final CompoundTag blueprintDataWrapper = new CompoundTag();
+        writeSchematicDataToNBT(blueprintDataWrapper);
+        output.store(IBlueprintDataProviderBE.TAG_BLUEPRINTDATA, CompoundTag.CODEC, blueprintDataWrapper.getCompoundOrEmpty(IBlueprintDataProviderBE.TAG_BLUEPRINTDATA));
 
         // this is still needed even with data components as of 1.21
-        serializeReplacement(compound, dynamicOps, replacement);
+        output.store(CAPTURED_BLOCK_TAG, CapturedBlock.CODEC, replacement);
     }
 
     public static void serializeReplacement(final CompoundTag compound, final DynamicOps<Tag> dynamicOps, final CapturedBlock replacement)
@@ -214,7 +228,7 @@ public class BlockEntityTagSubstitution extends BlockEntity implements IBlueprin
     }
 
     @Override
-    protected void applyImplicitComponents(final BlockEntity.DataComponentInput componentInput)
+    protected void applyImplicitComponents(final DataComponentGetter componentInput)
     {
         super.applyImplicitComponents(componentInput);
         replacement = componentInput.getOrDefault(ModDataComponents.CAPTURED_BLOCK, CapturedBlock.EMPTY);
@@ -228,8 +242,8 @@ public class BlockEntityTagSubstitution extends BlockEntity implements IBlueprin
     }
 
     @Override
-    public void removeComponentsFromTag(final CompoundTag itemStackTag)
+    public void removeComponentsFromTag(final ValueOutput output)
     {
-        itemStackTag.remove(CAPTURED_BLOCK_TAG);
+        output.discard(CAPTURED_BLOCK_TAG);
     }
 }

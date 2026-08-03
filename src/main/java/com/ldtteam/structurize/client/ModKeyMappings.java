@@ -1,10 +1,12 @@
 package com.ldtteam.structurize.client;
 
 import com.ldtteam.blockui.BOScreen;
+import com.ldtteam.structurize.api.constants.Constants;
 import com.ldtteam.structurize.client.gui.AbstractBlueprintManipulationWindow;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.settings.IKeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
@@ -15,7 +17,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class ModKeyMappings
 {
-    private static final String CATEGORY = "key.structurize.categories.general";
+    private static final KeyMapping.Category CATEGORY = new KeyMapping.Category(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "general"));
 
     public static final IKeyConflictContext BLUEPRINT_WINDOW = new IKeyConflictContext()
     {
@@ -71,6 +73,7 @@ public class ModKeyMappings
      */
     public static void register(@NotNull final RegisterKeyMappingsEvent event)
     {
+        event.registerCategory(CATEGORY);
         event.register(TELEPORT.get());
         event.register(MOVE_FORWARD.get());
         event.register(MOVE_BACK.get());

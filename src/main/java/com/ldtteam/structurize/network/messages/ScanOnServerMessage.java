@@ -53,6 +53,6 @@ public class ScanOnServerMessage extends AbstractServerPlayMessage
     @Override
     protected void onExecute(final IPayloadContext context, final ServerPlayer player)
     {
-        ItemScanTool.saveStructure(player.getCommandSenderWorld(), player, this.slot, saveEntities);
+        ItemScanTool.saveStructure(player.level(), player, this.slot, saveEntities);
     }
 }

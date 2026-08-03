@@ -15,9 +15,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AirBlock;
@@ -333,13 +337,11 @@ public class StructurePlacer
                 {
                     final BlockPos pos = this.handler.getCenterPos().subtract(handler.getBluePrint().getPrimaryBlockOffset());
 
-                    final Optional<EntityType<?>> type = EntityType.by(compound);
-                    if (type.isPresent())
+                    final ValueInput entityInput = TagValueInput.create(ProblemReporter.DISCARDING, world.registryAccess(), compound);
+                    final Optional<Entity> createdEntity = EntityType.create(entityInput, world, EntitySpawnReason.STRUCTURE);
+                    if (createdEntity.isPresent())
                     {
-                        final Entity entity = type.get().create(world);
-                        if (entity != null)
-                        {
-                            entity.load(compound);
+                        final Entity entity = createdEntity.get();
 
                             entity.setUUID(UUID.randomUUID());
                             final Vec3 posInWorld = entity.position().add(pos.getX(), pos.getY(), pos.getZ());
@@ -348,7 +350,7 @@ public class StructurePlacer
                             {
                                 moveToPos = posInWorld.subtract(Vec3.atLowerCornerOf(hang.blockPosition().subtract(hang.getPos())));
                             }
-                            entity.moveTo(moveToPos.x, moveToPos.y, moveToPos.z, entity.getYRot(), entity.getXRot());
+                            entity.snapTo(moveToPos.x, moveToPos.y, moveToPos.z, entity.getYRot(), entity.getXRot());
                             final List<? extends Entity> list = world.getEntitiesOfClass(entity.getClass(), new AABB(posInWorld.add(1,1,1), posInWorld.add(-1,-1,-1)));
                             boolean foundEntity = false;
                             for (Entity worldEntity: list)
@@ -401,7 +403,6 @@ public class StructurePlacer
                             }
                         }
                     }
-                }
                 catch (final RuntimeException e)
                 {
                     Log.getLogger().info("Couldn't restore entity", e);

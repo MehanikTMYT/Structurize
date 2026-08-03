@@ -2,6 +2,7 @@ package com.ldtteam.structurize.util;
 
 import com.ldtteam.structurize.api.ItemStackUtils;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.neoforged.neoforge.items.IItemHandler;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +95,8 @@ public class InventoryUtils
     public static void consumeStack(final ItemStack tempStack, final IItemHandler handler)
     {
         int count = tempStack.getCount();
-        final ItemStack container = tempStack.getCraftingRemainingItem();
+        final ItemStackTemplate containerTemplate = tempStack.getItem().getCraftingRemainder(tempStack);
+        final ItemStack container = containerTemplate == null ? ItemStack.EMPTY : containerTemplate.create();
 
         for (int i = 0; i < handler.getSlots(); i++)
         {

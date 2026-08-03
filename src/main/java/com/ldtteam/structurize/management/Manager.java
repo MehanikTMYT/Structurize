@@ -544,7 +544,7 @@ public final class Manager
         final List<ChangeStorage> list = changeQueue.get(player.getUUID());
         if (list == null || list.isEmpty())
         {
-            player.displayClientMessage(Component.translatable("structurize.gui.undoredo.undo.notfound"), false);
+            player.sendSystemMessage(Component.translatable("structurize.gui.undoredo.undo.notfound"));
             return;
         }
 
@@ -555,11 +555,11 @@ public final class Manager
             {
                 if (!storage.isDone())
                 {
-                    player.displayClientMessage(Component.translatable("structurize.gui.undoredo.undo.inprogress", storage.getOperation()), false);
+                    player.sendSystemMessage(Component.translatable("structurize.gui.undoredo.undo.inprogress", storage.getOperation()));
                     return;
                 }
 
-                player.displayClientMessage(Component.translatable("structurize.gui.undoredo.undo.add", storage.getOperation()), false);
+                player.sendSystemMessage(Component.translatable("structurize.gui.undoredo.undo.add", storage.getOperation()));
                 addToQueue(new UndoOperation(player, storage));
                 if (storage.getOperation().toString().indexOf(UNDO_PREFIX) == 0)
                 {
@@ -569,7 +569,7 @@ public final class Manager
             }
         }
 
-        player.displayClientMessage(Component.translatable("structurize.gui.undoredo.undo.notfound"), false);
+        player.sendSystemMessage(Component.translatable("structurize.gui.undoredo.undo.notfound"));
     }
 
     /**
@@ -583,7 +583,7 @@ public final class Manager
         final List<ChangeStorage> list = changeQueue.get(player.getUUID());
         if (list == null || list.isEmpty())
         {
-            player.displayClientMessage(Component.translatable("structurize.gui.undoredo.redo.notfound"), false);
+            player.sendSystemMessage(Component.translatable("structurize.gui.undoredo.redo.notfound"));
             return;
         }
 
@@ -593,17 +593,17 @@ public final class Manager
             {
                 if (!storage.isDone())
                 {
-                    player.displayClientMessage(Component.translatable("structurize.gui.undoredo.redo.inprogress", storage.getOperation()), false);
+                    player.sendSystemMessage(Component.translatable("structurize.gui.undoredo.redo.inprogress", storage.getOperation()));
                     return;
                 }
 
-                player.displayClientMessage(Component.translatable("structurize.gui.undoredo.redo.add", storage.getOperation()), false);
+                player.sendSystemMessage(Component.translatable("structurize.gui.undoredo.redo.add", storage.getOperation()));
                 addToQueue(new RedoOperation(player, storage));
                 return;
             }
         }
 
-        player.displayClientMessage(Component.translatable("structurize.gui.undoredo.redo.notfound"), false);
+        player.sendSystemMessage(Component.translatable("structurize.gui.undoredo.redo.notfound"));
     }
 
     /**

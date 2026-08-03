@@ -57,7 +57,7 @@ public class AbsorbBlockMessage extends AbstractServerPlayMessage
     @Override
     protected void onExecute(final IPayloadContext context, final ServerPlayer player)
     {
-        final ItemStack current = player.getInventory().getSelected();
+        final ItemStack current = player.getInventory().getSelectedItem();
 
         if (current.getItem() instanceof ItemTagSubstitution anchor)
         {

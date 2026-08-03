@@ -9,10 +9,7 @@ import com.ldtteam.structurize.component.ModDataComponents;
 import com.ldtteam.structurize.network.messages.AbsorbBlockMessage;
 import com.ldtteam.structurize.tag.ModTags;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -77,7 +74,7 @@ public class ItemTagSubstitution extends BlockItem implements ISpecialBlockPickI
     @NotNull
     private ItemStack getPickedBlock(@NotNull Player player, @NotNull BlockPos pos, @NotNull BlockState blockstate)
     {
-        return blockstate.getCloneItemStack(Minecraft.getInstance().hitResult, player.level(), pos, player);
+        return blockstate.getCloneItemStack(pos, player.level(), true, player);
     }
 
     public void onAbsorbBlock(@NotNull final ServerPlayer player,
@@ -110,8 +107,7 @@ public class ItemTagSubstitution extends BlockItem implements ISpecialBlockPickI
     {
         if (blockentity == null) return true;
 
-        final HolderSet.Named<BlockEntityType<?>> tag = BuiltInRegistries.BLOCK_ENTITY_TYPE.getTag(ModTags.SUBSTITUTION_ABSORB_WHITELIST).get();
-        return tag.contains(blockentity.getType().builtInRegistryHolder());
+        return blockentity.getType().builtInRegistryHolder().is(ModTags.SUBSTITUTION_ABSORB_WHITELIST);
     }
 
     @Override

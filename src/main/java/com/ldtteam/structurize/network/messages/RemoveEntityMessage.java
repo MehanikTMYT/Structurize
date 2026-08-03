@@ -8,7 +8,7 @@ import com.ldtteam.structurize.operations.RemoveEntityOperation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -33,7 +33,7 @@ public class RemoveEntityMessage extends AbstractServerPlayMessage
     /**
      * The entity to remove from the world.
      */
-    private final ResourceLocation entityName;
+    private final Identifier entityName;
 
     /**
      * Empty constructor used when registering the message.
@@ -43,7 +43,7 @@ public class RemoveEntityMessage extends AbstractServerPlayMessage
         super(buf, type);
         this.from = buf.readBlockPos();
         this.to = buf.readBlockPos();
-        this.entityName = buf.readResourceLocation();
+        this.entityName = buf.readIdentifier();
     }
 
     /**
@@ -53,7 +53,7 @@ public class RemoveEntityMessage extends AbstractServerPlayMessage
      * @param pos2       end coordinate.
      * @param entityName the entity to remove.
      */
-    public RemoveEntityMessage(final BlockPos pos1, final BlockPos pos2, final ResourceLocation entityName)
+    public RemoveEntityMessage(final BlockPos pos1, final BlockPos pos2, final Identifier entityName)
     {
         super(TYPE);
         this.from = pos1;
@@ -66,7 +66,7 @@ public class RemoveEntityMessage extends AbstractServerPlayMessage
     {
         buf.writeBlockPos(from);
         buf.writeBlockPos(to);
-        buf.writeResourceLocation(entityName);
+        buf.writeIdentifier(entityName);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class RemoveEntityMessage extends AbstractServerPlayMessage
             return;
         }
 
-        final EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(entityName);
+        final EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(entityName);
         if (type != null)
         {
             Manager.addToQueue(new RemoveEntityOperation(player, from, to, type));

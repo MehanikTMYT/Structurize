@@ -63,7 +63,10 @@ public class ClientStructurePackLoader
         final List<String> modList = new ArrayList<>();
         for (IModInfo mod : ModList.get().getMods())
         {
-            modPaths.add(mod.getOwningFile().getFile().findResource(BLUEPRINT_FOLDER, mod.getModId()));
+            // PORT-26.1.2: IModFile#findResource(String...) was removed; resolve the same "<contentRoot>/blueprints/<modid>"
+            // path manually against the mod's own content root(s) instead. See PORT_26.1.2.md.
+            mod.getOwningFile().getFile().getContents().getContentRoots().stream().findFirst()
+                .ifPresent(contentRoot -> modPaths.add(contentRoot.resolve(BLUEPRINT_FOLDER).resolve(mod.getModId())));
             modList.add(mod.getModId());
         }
 
@@ -183,7 +186,7 @@ public class ClientStructurePackLoader
             return;
         }
         
-        if (serverStructurePacks.containsKey(Minecraft.getInstance().player.getGameProfile().getName()))
+        if (serverStructurePacks.containsKey(Minecraft.getInstance().player.getGameProfile().name()))
         {
             Minecraft.getInstance().player.sendSystemMessage(Component.translatable("structurize.pack.equaluser.error"));
         }
@@ -354,6 +357,6 @@ public class ClientStructurePackLoader
             .resolve(packName.toLowerCase(Locale.US))
             .resolve(SCANS_FOLDER).resolve(fileName), provider));
         RenderingCache.getOrCreateBlueprintPreviewData("blueprint").setPos(null);
-        Minecraft.getInstance().player.displayClientMessage(Component.translatable("Scan successfully saved as %s", fileName), false);
+        Minecraft.getInstance().player.sendSystemMessage(Component.translatable("Scan successfully saved as %s", fileName));
     }
 }

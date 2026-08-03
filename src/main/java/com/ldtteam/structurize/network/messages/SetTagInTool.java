@@ -57,7 +57,7 @@ public class SetTagInTool extends AbstractServerPlayMessage
     {
         if (!player.isCreative())
         {
-            player.displayClientMessage(Component.translatable("structurize.gui.tagtool.creative_only"), false);
+            player.sendSystemMessage(Component.translatable("structurize.gui.tagtool.creative_only"));
             return;
         }
 

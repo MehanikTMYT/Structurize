@@ -33,8 +33,8 @@ public class WindowBlockGetterContents extends BOWindow
     {
         this(blueprint,
             realLevel,
-            new BlockPos(blueprint.getMinX(), blueprint.getMinBuildHeight(), blueprint.getMinZ()),
-            new BlockPos(blueprint.getMaxX() - 1, blueprint.getMaxBuildHeight() - 1, blueprint.getMaxZ() - 1),
+            new BlockPos(blueprint.getMinX(), blueprint.getMinY(), blueprint.getMinZ()),
+            new BlockPos(blueprint.getMaxX() - 1, blueprint.getMaxY(), blueprint.getMaxZ() - 1),
             boundedEntities);
     }
 

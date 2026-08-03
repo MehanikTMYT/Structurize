@@ -3,14 +3,17 @@ package com.ldtteam.structurize.client;
 import com.ldtteam.structurize.items.ItemStackTooltip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix4f;
 
+/**
+ * PORT-26.1.2: {@code ClientTooltipComponent} moved from an immediate-draw {@code render(...)}/{@code GuiGraphics}
+ * model to an extract-based one ({@code extractText}/{@code extractImage} against {@link GuiGraphicsExtractor}),
+ * and {@code getHeight()} now takes a {@link Font}. Re-implemented against the new methods below.
+ */
 public class ClientItemStackTooltip implements ClientTooltipComponent
 {
     private final ItemStackTooltip component;
@@ -21,7 +24,7 @@ public class ClientItemStackTooltip implements ClientTooltipComponent
     }
 
     @Override
-    public int getHeight()
+    public int getHeight(@NotNull final Font font)
     {
         return 20;
     }
@@ -33,18 +36,16 @@ public class ClientItemStackTooltip implements ClientTooltipComponent
     }
 
     @Override
-    public void renderText(@NotNull Font font, final int x, final int y,
-                           @NotNull final Matrix4f pose,
-                           @NotNull final MultiBufferSource.BufferSource buffers)
+    public void extractText(@NotNull final GuiGraphicsExtractor target, @NotNull final Font font, final int x, final int y)
     {
-        font.drawInBatch(this.component.getStack().getHoverName(), x + 20, y + (20 - font.lineHeight) / 2f, 0xffffffff, false, pose, buffers, Font.DisplayMode.NORMAL, 0, 0x00f000f0);
+        target.text(font, this.component.getStack().getHoverName(), x + 20, y + (20 - font.lineHeight) / 2, 0xffffffff);
     }
 
     @Override
-    public void renderImage(final Font font, final int x, final int y, final GuiGraphics target)
+    public void extractImage(@NotNull final Font font, final int x, final int y, final int width, final int height, @NotNull final GuiGraphicsExtractor target)
     {
-        target.renderItem(this.component.getStack(), x + 2, y + 2);
-        target.renderItemDecorations(getFont(this.component.getStack()), this.component.getStack(), x + 2, y + 2);
+        target.item(this.component.getStack(), x + 2, y + 2);
+        target.itemDecorations(getFont(this.component.getStack()), this.component.getStack(), x + 2, y + 2);
     }
 
     /**

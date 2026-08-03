@@ -7,6 +7,7 @@ import com.ldtteam.structurize.api.Log;
 import com.ldtteam.structurize.storage.rendering.types.BlueprintPreviewData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import java.util.Collection;
@@ -77,11 +78,11 @@ public final class BlueprintHandler
             Log.getLogger().warn("Trying to draw null blueprint!");
             return;
         }
-        Minecraft.getInstance().getProfiler().push("struct_render_cache");
+        Profiler.get().push("struct_render_cache");
         
         rendererCache.getUnchecked(previewData.getRenderKey()).draw(previewData, pos, ctx);
 
-        Minecraft.getInstance().getProfiler().pop();
+        Profiler.get().pop();
     }
 
     /**
@@ -116,7 +117,7 @@ public final class BlueprintHandler
             return;
         }
 
-        Minecraft.getInstance().getProfiler().push("struct_render_multi");
+        Profiler.get().push("struct_render_multi");
 
         final BlueprintRenderer renderer = rendererCache.getUnchecked(previewData.getRenderKey());
 
@@ -125,7 +126,7 @@ public final class BlueprintHandler
             renderer.draw(previewData, coord, ctx);
         }
 
-        Minecraft.getInstance().getProfiler().pop();
+        Profiler.get().pop();
     }
 
     /**

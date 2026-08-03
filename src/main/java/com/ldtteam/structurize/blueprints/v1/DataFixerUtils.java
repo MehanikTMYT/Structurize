@@ -28,12 +28,12 @@ public class DataFixerUtils
 
     public static CompoundTag runDataFixer(final CompoundTag dataIn, final TypeReference dataType, final DataVersion startVersion)
     {
-        return runDataFixer(dataIn, dataType, startVersion.getDataVersion(), SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+        return runDataFixer(dataIn, dataType, startVersion.getDataVersion(), SharedConstants.getCurrentVersion().dataVersion().version());
     }
 
     public static CompoundTag runDataFixer(final CompoundTag dataIn, final TypeReference dataType, final int startVersion)
     {
-        return runDataFixer(dataIn, dataType, startVersion, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+        return runDataFixer(dataIn, dataType, startVersion, SharedConstants.getCurrentVersion().dataVersion().version());
     }
 
     public static CompoundTag runDataFixer(final CompoundTag dataIn, final TypeReference dataType, final DataVersion startVersion, final DataVersion endVersion)

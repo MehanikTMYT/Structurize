@@ -1,7 +1,6 @@
 package com.ldtteam.structurize.datagen;
 
 import com.ldtteam.domumornamentum.entity.block.ModBlockEntityTypes;
-import com.ldtteam.domumornamentum.util.Constants;
 import com.ldtteam.structurize.tag.ModTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
@@ -10,9 +9,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.IntrinsicHolderTagsProvider;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -25,10 +22,9 @@ public class BlockEntityTagProvider extends IntrinsicHolderTagsProvider<BlockEnt
     public BlockEntityTagProvider(
       final PackOutput output,
       final ResourceKey<? extends Registry<BlockEntityType<?>>> key,
-      final CompletableFuture<HolderLookup.Provider> provider,
-      @Nullable final ExistingFileHelper existingFileHelper)
+      final CompletableFuture<HolderLookup.Provider> provider)
     {
-        super(output, key, provider, k -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getResourceKey(k).get(), Constants.MOD_ID, existingFileHelper);
+        super(output, key, provider, k -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getResourceKey(k).get());
     }
 
     @Override
