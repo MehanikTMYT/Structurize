@@ -9,9 +9,11 @@ import com.ldtteam.structurize.items.ModItems;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.function.Supplier;
+import java.util.function.Function;
 
 /**
  * Class to register blocks to Structurize
@@ -36,9 +38,14 @@ public final class ModBlocks
      * @param <B> the block subclass for the factory response
      * @return the block entry saved to the registry
      */
-    public static <B extends Block> DeferredBlock<B> registerWithBlockItem(String name, Supplier<B> block)
+    public static <B extends Block> DeferredBlock<B> registerWithBlockItem(
+        final String name,
+        final Function<BlockBehaviour.Properties, ? extends B> blockFactory,
+        final Supplier<BlockBehaviour.Properties> properties)
     {
-        final DeferredBlock<B> registered = BLOCKS.register(name, block);
+        final DeferredBlock<B> registered =
+            BLOCKS.registerBlock(name, blockFactory, properties);
+
         ModItems.ITEMS.registerSimpleBlockItem(registered);
         return registered;
     }
@@ -49,9 +56,24 @@ public final class ModBlocks
 
     static
     {
-        blockSubstitution       = registerWithBlockItem("blockSubstitution".toLowerCase(), BlockSubstitution::new);
-        blockSolidSubstitution  = registerWithBlockItem("blockSolidSubstitution".toLowerCase(), BlockSolidSubstitution::new);
-        blockFluidSubstitution  = registerWithBlockItem("blockFluidSubstitution".toLowerCase(), BlockFluidSubstitution::new);
-        blockTagSubstitution    = BLOCKS.register("blockTagSubstitution".toLowerCase(), BlockTagSubstitution::new);
+        blockSubstitution = registerWithBlockItem(
+            "blocksubstitution",
+            BlockSubstitution::new,
+            BlockSubstitution::defaultSubstitutionProperties);
+
+        blockSolidSubstitution = registerWithBlockItem(
+            "blocksolidsubstitution",
+            BlockSolidSubstitution::new,
+            BlockSubstitution::defaultSubstitutionProperties);
+
+        blockFluidSubstitution = registerWithBlockItem(
+            "blockfluidsubstitution",
+            BlockFluidSubstitution::new,
+            BlockSubstitution::defaultSubstitutionProperties);
+
+        blockTagSubstitution = BLOCKS.registerBlock(
+            "blocktagsubstitution",
+            BlockTagSubstitution::new,
+            BlockSubstitution::defaultSubstitutionProperties);
     }
 }

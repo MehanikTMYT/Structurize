@@ -35,10 +35,7 @@ public class ItemTagTool extends AbstractItemWithPosSelector
      */
     public ItemTagTool()
     {
-        this(new Properties().durability(0)
-            .setNoCombineRepair()
-            .rarity(Rarity.UNCOMMON)
-            .component(ModDataComponents.TAGS_DATA, TagData.EMPTY));
+        this(new Properties());
     }
 
     /**
@@ -48,7 +45,11 @@ public class ItemTagTool extends AbstractItemWithPosSelector
      */
     public ItemTagTool(final Properties properties)
     {
-        super(properties);
+        super(properties
+            .durability(0)
+            .setNoCombineRepair()
+            .rarity(Rarity.UNCOMMON)
+            .component(ModDataComponents.TAGS_DATA, TagData.EMPTY));
     }
 
     @Override

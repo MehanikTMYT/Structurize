@@ -17,7 +17,12 @@ public class ItemShapeTool extends AbstractItemStructurize
      */
     public ItemShapeTool()
     {
-        super("shapetool", new Properties().stacksTo(1));
+        this(new Properties());
+    }
+
+    public ItemShapeTool(final Properties properties)
+    {
+        super("shapetool", properties.stacksTo(1));
     }
 
     @Override

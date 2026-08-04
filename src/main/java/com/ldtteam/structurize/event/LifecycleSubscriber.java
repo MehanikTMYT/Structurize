@@ -80,17 +80,25 @@ public class LifecycleSubscriber
     }
 
     @SubscribeEvent
-    public static void onDatagen(@NotNull final GatherDataEvent event)
+    public static void onServerDatagen(@NotNull final GatherDataEvent.Server event)
     {
-        if (event instanceof GatherDataEvent.Server)
-        {
-            event.addProvider(new BlockEntityTagProvider(event.getGenerator().getPackOutput(), Registries.BLOCK_ENTITY_TYPE, event.getLookupProvider()));
-            event.addProvider(new BlockTagProvider(event.getGenerator().getPackOutput(), Registries.BLOCK, event.getLookupProvider()));
-        }
-        if (event instanceof GatherDataEvent.Client)
-        {
-            event.addProvider(new EntityTagProvider(event.getGenerator().getPackOutput(), Registries.ENTITY_TYPE, event.getLookupProvider()));
-        }
+        event.addProvider(new BlockEntityTagProvider(
+          event.getGenerator().getPackOutput(),
+          Registries.BLOCK_ENTITY_TYPE,
+          event.getLookupProvider()));
+        event.addProvider(new BlockTagProvider(
+          event.getGenerator().getPackOutput(),
+          Registries.BLOCK,
+          event.getLookupProvider()));
+    }
+
+    @SubscribeEvent
+    public static void onClientDatagen(@NotNull final GatherDataEvent.Client event)
+    {
+        event.addProvider(new EntityTagProvider(
+          event.getGenerator().getPackOutput(),
+          Registries.ENTITY_TYPE,
+          event.getLookupProvider()));
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

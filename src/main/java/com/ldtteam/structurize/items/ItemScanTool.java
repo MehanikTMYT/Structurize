@@ -78,10 +78,7 @@ public class ItemScanTool extends AbstractItemWithPosSelector implements IScroll
      */
     public ItemScanTool()
     {
-        this(new Properties().durability(0)
-            .setNoCombineRepair()
-            .rarity(Rarity.UNCOMMON)
-            .component(ModDataComponents.SCAN_TOOL, ScanToolData.EMPTY));
+        this(new Properties());
     }
 
     /**
@@ -91,7 +88,11 @@ public class ItemScanTool extends AbstractItemWithPosSelector implements IScroll
      */
     public ItemScanTool(final Properties properties)
     {
-        super(properties);
+        super(properties
+            .durability(0)
+            .setNoCombineRepair()
+            .rarity(Rarity.UNCOMMON)
+            .component(ModDataComponents.SCAN_TOOL, ScanToolData.EMPTY));
     }
 
     @Override

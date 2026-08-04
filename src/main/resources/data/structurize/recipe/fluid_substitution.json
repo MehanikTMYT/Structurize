@@ -6,15 +6,9 @@
     "SW "
   ],
   "key": {
-    "W": {
-      "tag": "minecraft:logs"
-    },
-    "U": {
-      "item": "minecraft:bucket"
-    },
-    "S": {
-      "tag": "c:rods/wooden"
-    }
+    "W": "#minecraft:logs",
+    "U": "minecraft:bucket",
+    "S": "#c:rods/wooden"
   },
   "result": {
     "id": "structurize:blockfluidsubstitution",

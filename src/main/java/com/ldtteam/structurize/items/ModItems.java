@@ -3,7 +3,6 @@ package com.ldtteam.structurize.items;
 import com.ldtteam.structurize.api.constants.Constants;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import java.util.function.Supplier;
 
 /**
  * Class to register items to Structurize
@@ -27,11 +26,28 @@ public final class ModItems
 
     static
     {
-        buildTool = ITEMS.register("sceptergold", ItemBuildTool::new);
-        shapeTool = ITEMS.register("shapetool", ItemShapeTool::new);
-        scanTool  = ITEMS.register("sceptersteel", (Supplier<ItemScanTool>) ItemScanTool::new);
-        tagTool   = ITEMS.register("sceptertag", (Supplier<ItemTagTool>) ItemTagTool::new);
-        caliper   = ITEMS.register("caliper", ItemCaliper::new);
-        blockTagSubstitution = ITEMS.register("blockTagSubstitution".toLowerCase(), ItemTagSubstitution::new);
+        buildTool = ITEMS.registerItem(
+            "sceptergold",
+            ItemBuildTool::new);
+
+        shapeTool = ITEMS.registerItem(
+            "shapetool",
+            ItemShapeTool::new);
+
+        scanTool = ITEMS.registerItem(
+            "sceptersteel",
+            ItemScanTool::new);
+
+        tagTool = ITEMS.registerItem(
+            "sceptertag",
+            ItemTagTool::new);
+
+        caliper = ITEMS.registerItem(
+            "caliper",
+            ItemCaliper::new);
+
+        blockTagSubstitution = ITEMS.registerItem(
+            "blocktagsubstitution",
+            ItemTagSubstitution::new);
     }
 }

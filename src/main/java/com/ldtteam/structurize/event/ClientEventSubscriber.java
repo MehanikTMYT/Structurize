@@ -51,16 +51,56 @@ public class ClientEventSubscriber
      *
      * @param event the catched event.
      */
-    @SubscribeEvent
-    public static void renderWorldLastEvent(final RenderLevelStageEvent event)
+    private static void renderWorldStage(final RenderLevelStageEvent event)
     {
         WorldRenderContext.INSTANCE.renderWorldLastEvent(event);
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void finishBuffers(final RenderLevelStageEvent event)
+    private static void finishWorldStage(final RenderLevelStageEvent event)
     {
         WorldRenderContext.RenderTypes.finishBuffer(event);
+    }
+
+    @SubscribeEvent
+    public static void renderAfterOpaqueFeatures(
+      final RenderLevelStageEvent.AfterOpaqueFeatures event)
+    {
+        renderWorldStage(event);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void finishAfterOpaqueFeatures(
+      final RenderLevelStageEvent.AfterOpaqueFeatures event)
+    {
+        finishWorldStage(event);
+    }
+
+    @SubscribeEvent
+    public static void renderAfterTranslucentFeatures(
+      final RenderLevelStageEvent.AfterTranslucentFeatures event)
+    {
+        renderWorldStage(event);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void finishAfterTranslucentFeatures(
+      final RenderLevelStageEvent.AfterTranslucentFeatures event)
+    {
+        finishWorldStage(event);
+    }
+
+    @SubscribeEvent
+    public static void renderAfterTranslucentBlocks(
+      final RenderLevelStageEvent.AfterTranslucentBlocks event)
+    {
+        renderWorldStage(event);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void finishAfterTranslucentBlocks(
+      final RenderLevelStageEvent.AfterTranslucentBlocks event)
+    {
+        finishWorldStage(event);
     }
 
     /**

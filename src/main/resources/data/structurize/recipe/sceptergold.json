@@ -6,12 +6,8 @@
     "S  "
   ],
   "key": {
-    "C": {
-      "tag": "minecraft:stone_crafting_materials"
-    },
-    "S": {
-      "tag": "c:rods/wooden"
-    }
+    "C": "#minecraft:stone_crafting_materials",
+    "S": "#c:rods/wooden"
   },
   "result": {
     "id": "structurize:sceptergold"

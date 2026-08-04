@@ -30,7 +30,18 @@ public class ItemTagSubstitution extends BlockItem implements ISpecialBlockPickI
 {
     public ItemTagSubstitution()
     {
-        super(ModBlocks.blockTagSubstitution.get(), new Properties().component(ModDataComponents.CAPTURED_BLOCK, CapturedBlock.EMPTY));
+        this(new Properties());
+    }
+
+    public ItemTagSubstitution(final Properties properties)
+    {
+        super(
+            ModBlocks.blockTagSubstitution.get(),
+            properties
+                .useBlockDescriptionPrefix()
+                .component(
+                    ModDataComponents.CAPTURED_BLOCK,
+                    CapturedBlock.EMPTY));
     }
 
     @NotNull

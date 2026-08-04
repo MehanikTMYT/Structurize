@@ -6,12 +6,8 @@
     "S  "
   ],
   "key": {
-    "X": {
-      "item": "minecraft:iron_ingot"
-    },
-    "S": {
-      "tag": "c:rods/wooden"
-    }
+    "X": "minecraft:iron_ingot",
+    "S": "#c:rods/wooden"
   },
   "result": {
     "id": "structurize:sceptersteel"

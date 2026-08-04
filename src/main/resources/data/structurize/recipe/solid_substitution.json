@@ -6,15 +6,9 @@
     "SW "
   ],
   "key": {
-    "W": {
-      "tag": "minecraft:logs"
-    },
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "S": {
-      "tag": "c:rods/wooden"
-    }
+    "W": "#minecraft:logs",
+    "I": "minecraft:iron_ingot",
+    "S": "#c:rods/wooden"
   },
   "result": {
     "id": "structurize:blocksolidsubstitution",

@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.MapColor;
@@ -29,10 +30,9 @@ public class BlockSubstitution extends Block implements LiquidBlockContainer
     /**
      * Constructor for the Substitution block. sets the creative tab, as well as the resistance and the hardness.
      */
-    public BlockSubstitution()
+    public BlockSubstitution(final BlockBehaviour.Properties properties)
     {
-        super(defaultSubstitutionProperties()
-                .forceSolidOff());  // don't kill farmland and path blocks underneath
+        super(properties.forceSolidOff()); // don't kill farmland and path blocks underneath
     }
 
     public static Properties defaultSubstitutionProperties()

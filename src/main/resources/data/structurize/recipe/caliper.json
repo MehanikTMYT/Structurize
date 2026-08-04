@@ -6,18 +6,10 @@
     "C N"
   ],
   "key": {
-    "I": {
-      "tag": "c:ingots/iron"
-    },
-    "S": {
-      "tag": "c:rods/wooden"
-    },
-    "C": {
-      "tag": "minecraft:coals"
-    },
-    "N": {
-      "tag": "c:nuggets/iron"
-    }
+    "I": "#c:ingots/iron",
+    "S": "#c:rods/wooden",
+    "C": "#minecraft:coals",
+    "N": "#c:nuggets/iron"
   },
   "result": {
     "id": "structurize:caliper",

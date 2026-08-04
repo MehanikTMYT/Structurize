@@ -11,6 +11,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.storage.TagValueOutput;
 import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
@@ -20,6 +21,11 @@ import javax.annotation.Nullable;
  */
 public class BlockTagSubstitution extends BlockSubstitution implements IAnchorBlock, EntityBlock
 {
+    public BlockTagSubstitution(final BlockBehaviour.Properties properties)
+    {
+        super(properties);
+    }
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(final @NotNull BlockPos blockPos, final @NotNull BlockState blockState)

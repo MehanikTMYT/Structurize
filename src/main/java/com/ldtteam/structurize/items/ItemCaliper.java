@@ -22,7 +22,12 @@ public class ItemCaliper extends AbstractItemWithPosSelector
      */
     public ItemCaliper()
     {
-        super(new Properties().stacksTo(1));
+        this(new Properties());
+    }
+
+    public ItemCaliper(final Properties properties)
+    {
+        super(properties.stacksTo(1));
     }
 
     @Override

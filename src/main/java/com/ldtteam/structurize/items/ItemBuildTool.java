@@ -25,7 +25,12 @@ public class ItemBuildTool extends AbstractItemStructurize
      */
     public ItemBuildTool()
     {
-        super("sceptergold", new Properties().stacksTo(1));
+        this(new Properties());
+    }
+
+    public ItemBuildTool(final Properties properties)
+    {
+        super("sceptergold", properties.stacksTo(1));
     }
 
     @Override
