@@ -22,6 +22,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforgespi.language.IModInfo;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
