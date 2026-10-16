@@ -19,7 +19,6 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -30,14 +29,12 @@ import net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent;
 public class ClientLifecycleSubscriber
 {
     @SubscribeEvent
-    public static void onClientInit(final FMLClientSetupEvent event)
-    {
-        ClientStructurePackLoader.onClientLoading();
-    }
-
-    @SubscribeEvent
     public static void onRegisterReloadListeners(final AddClientReloadListenersEvent event)
     {
+        // Upstream #855: start loading client structure packs here instead of FMLClientSetupEvent
+        // (1.21.1: RegisterClientReloadListenersEvent; 26.1: AddClientReloadListenersEvent).
+        ClientStructurePackLoader.onClientLoading();
+
         event.addListener(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "blueprint_renderer_cache"), new SimplePreparableReloadListener<>()
         {
             @Override

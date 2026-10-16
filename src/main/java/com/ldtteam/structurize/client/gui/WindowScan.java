@@ -209,7 +209,7 @@ public class WindowScan extends AbstractWindowSkeleton
         }
         catch (Exception e)
         {
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Invalid Number"));
+            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("structurize.gui.scan.invalid_number"));
         }
         close();
     }
@@ -426,7 +426,7 @@ public class WindowScan extends AbstractWindowSkeleton
         }
         catch (final NumberFormatException e)
         {
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Invalid Number"));
+            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("structurize.gui.scan.invalid_number"));
             return;
         }
 

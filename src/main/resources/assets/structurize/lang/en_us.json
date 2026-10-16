@@ -80,12 +80,10 @@
   "com.structurize.command.playernotfound": "Couldn't find player to save the scan!",
   "com.structurize.command.scan.no.perm": "You don't have permission to scan via commands, use the Scan Tool instead!",
   "com.structurize.command.scan.success": "Scan successfully saved",
-
   "com.structurize.command.paste.no.perm": "You don't have permission to paste via commands, use the Build Tool instead!",
   "com.structurize.command.paste.no.pack": "The specified pack does not exist",
   "com.structurize.command.paste.no.blueprint": "The specified blueprint does not exist",
   "com.structurize.command.paste.success": "Paste successfully triggered",
-
   "com.structurize.gui.buildtool.leave.tip": "Right-click the build tool on a solid block to adjust the build's position",
   "com.structurize.gui.buildtool.tip": "Press ESC to leave the GUI to inspect the preview",
   "key.category.structurize.general": "Structurize",
@@ -207,7 +205,6 @@
   "com.ldtteam.structurize.iterators.inwardcircleheight4": "Inward Circle Height 4",
   "com.ldtteam.structurize.iterators.hilbert": "Hilbert",
   "com.ldtteam.structurize.iterators.random": "Random",
-
   "com.ldtteam.structurize.iterators.default.tooltip": "Row by Row Block Placement",
   "com.ldtteam.structurize.iterators.inwardcircle.tooltip": "Placement in a Circle starting from the Outside",
   "com.ldtteam.structurize.iterators.inwardcircleheight1.tooltip": "Placement in a Circle, Placing Outer Rows up to 1 Higher",
@@ -216,7 +213,6 @@
   "com.ldtteam.structurize.iterators.inwardcircleheight4.tooltip": "Placement in a Circle, Placing Outer Rows up to 4 Higher",
   "com.ldtteam.structurize.iterators.hilbert.tooltip": "Mathematical Proximity Based Block Placement",
   "com.ldtteam.structurize.iterators.random.tooltip": "Places Blocks in the x/z Plane in a Random Order",
-
   "structurize.preview_renderer.exception": "An error happened during blueprint preview rendering. If you do not mind, please submit latest.log to our issue tracker. Thanks!",
   "structurize.preview_renderer.cannot_render": "Unrecoverable error occurred during rendering blueprint \"%s\". If you do not mind, please submit latest.log to our issue tracker. Thanks!",
   "com.ldtteam.structurize.remove_block": "Remove Block %s",
@@ -238,5 +234,11 @@
   "com.ldtteam.tag.tooltip.invisible": "Hide Blueprint in Buildtool like Integrated Buildings or Mineshafts",
   "com.ldtteam.structurize.gui.switchpack.authors": "Authors: %s",
   "com.ldtteam.structurize.gui.switchpack.list.empty": "There are no structure packs found, please install some",
-  "com.ldtteam.structurize.gui.switchpack.pack_disabled.hover_text": "This pack is disabled because it only exists on the client. In order to use this pack, the server must enable the config option '%s' on the server."
+  "com.ldtteam.structurize.gui.switchpack.pack_disabled.hover_text": "This pack is disabled because it only exists on the client. In order to use this pack, the server must enable the config option '%s' on the server.",
+  "structurize.gui.buildtool.level": "Level: %s",
+  "structurize.gui.shapetool.select_main_block": "Select the main block",
+  "structurize.gui.scan.invalid_number": "Invalid Number",
+  "structurize.pack.local.desc": "This is your local Structurepack. This is where all your scans go.",
+  "structurize.pack.category.local": "Local",
+  "structurize.pack.category.root": "Root"
 }

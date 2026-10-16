@@ -13,7 +13,7 @@
         <button id="minus" source="structurize:textures/gui/buildtool/minus.png" size="16" pos="0 32"/>
         <button id="down" source="structurize:textures/gui/buildtool/down.png" size="16" pos="16 32"/>
         <button id="plus" source="structurize:textures/gui/buildtool/plus.png" size="16" pos="32 32"/>
-        <image id="rotation" size="16" pos="96 0"/>
+        <image source="minecraft:missingno" id="rotation" size="16" pos="96 0"/>
     </view>
 
     <list size="188 100" pos="5 113" id="settinglist" visible="false">

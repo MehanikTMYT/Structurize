@@ -155,7 +155,8 @@ same generalized API rather than a vanilla dimension-key comparison.
 
 ## Temporary limitations / exclusions
 
-- **Blueprint preview rendering is disabled** (`BlueprintRenderer#drawUnsafe` logs a
+- **Blueprint preview rendering - RESTORED 2026-10-03** (blocks via `ModelBlockRenderer#tesselateBlock` into a per-layer quad cache replayed into `RenderTypes.*MovingBlock`; block entities/entities via extract+submit+`FeatureRenderDispatcher#renderAllFeatures`; `BlueprintRenderView` adapts the fake level to the client-only `BlockAndTintGetter`). Verified in game (Colonial house, MineColonies). Still missing: fluids, frustum culling, biome tint follows the bake position. Original note below:
+- ~~Blueprint preview rendering is disabled~~ (`BlueprintRenderer#drawUnsafe` logs a
   one-time warning and returns without drawing). `BlockRenderDispatcher#renderSingleBlock`
   and `Camera#setup` were removed, and `EntityRenderDispatcher`/`BlockEntityRenderDispatcher`
   now require the two-phase extract-render-state/submit model instead of a direct
@@ -214,3 +215,11 @@ release-ready, at minimum:
   `ClientStructurePackLoader`/`ServerStructurePackLoader`.
 - Verify the tag tool / pos-selector left-click flow in game, given the
   `canAttackBlock` → `PlayerInteractEvent.LeftClickBlock` migration.
+
+## 2026-10-09: blueprints from mod jars
+
+The `findResource` → `getContentRoots()` rewrite only worked in dev runs: for a packaged mod the content root is the jar
+file itself, so `<root>/blueprints/<modid>` never existed and every style shipped in a jar (MineColonies' own styles in a
+normal install, style-pack mods such as Byzantine) was skipped without a warning. `storage/ModBlueprintPaths` now checks
+every content root and opens jar roots as zip file systems (kept open; pack metas read blueprints from them lazily).
+Verified on a MineColonies dedicated server with Byzantine-1.21.1-37.jar: Byzantine_for_1.20, Nile and Shogun registered.

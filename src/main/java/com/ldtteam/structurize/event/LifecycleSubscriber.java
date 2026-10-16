@@ -6,26 +6,16 @@ import com.ldtteam.structurize.datagen.BlockEntityTagProvider;
 import com.ldtteam.structurize.datagen.BlockTagProvider;
 import com.ldtteam.structurize.datagen.EntityTagProvider;
 import com.ldtteam.structurize.network.messages.*;
-import com.ldtteam.structurize.placement.handlers.placement.PlacementHandlers;
 import com.ldtteam.structurize.storage.ServerStructurePackLoader;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.block.Block;
-import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Set;
 
 public class LifecycleSubscriber
 {
@@ -99,19 +89,5 @@ public class LifecycleSubscriber
           event.getGenerator().getPackOutput(),
           Registries.ENTITY_TYPE,
           event.getLookupProvider()));
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void registerCaps(final RegisterCapabilitiesEvent event)
-    {
-        final Set<Block> containerBlocks = Collections.newSetFromMap(new IdentityHashMap<>());
-        for (final Block block : BuiltInRegistries.BLOCK)
-        {
-            if (event.isBlockRegistered(Capabilities.Item.BLOCK, block))
-            {
-                containerBlocks.add(block);
-            }
-        }
-        PlacementHandlers.ContainerPlacementHandler.CONTAINERS = containerBlocks;
     }
 }

@@ -63,10 +63,9 @@ public class ClientStructurePackLoader
         final List<String> modList = new ArrayList<>();
         for (IModInfo mod : ModList.get().getMods())
         {
-            // PORT-26.1.2: IModFile#findResource(String...) was removed; resolve the same "<contentRoot>/blueprints/<modid>"
-            // path manually against the mod's own content root(s) instead. See PORT_26.1.2.md.
-            mod.getOwningFile().getFile().getContents().getContentRoots().stream().findFirst()
-                .ifPresent(contentRoot -> modPaths.add(contentRoot.resolve(BLUEPRINT_FOLDER).resolve(mod.getModId())));
+            // PORT-26.1.2: IModFile#findResource(String...) was removed; ModBlueprintPaths resolves "blueprints/<modid>"
+            // in directory content roots and inside mod jars. See PORT_26.1.2.md.
+            ModBlueprintPaths.find(mod).ifPresent(modPaths::add);
             modList.add(mod.getModId());
         }
 
@@ -83,6 +82,11 @@ public class ClientStructurePackLoader
             // This loads from the jar
             for (final Path modPath : modPaths)
             {
+                if (!Files.isDirectory(modPath))
+                {
+                    continue;
+                }
+
                 try
                 {
                     try (final Stream<Path> paths = Files.list(modPath))
@@ -136,7 +140,7 @@ public class ClientStructurePackLoader
                 Log.getLogger().warn("Failed loading packs from main folder path: " + gameFolder.toString());
             }
 
-            Log.getLogger().warn("Finished discovering Client Structure packs");
+            Log.getLogger().info("Finished discovering Client Structure packs");
 
             loadingState = ClientLoadingState.FINISHED_LOADING;
         });
@@ -160,7 +164,7 @@ public class ClientStructurePackLoader
         }
         else if (Minecraft.getInstance().level == null && (loadingState == ClientLoadingState.SYNCING || loadingState == ClientLoadingState.FINISHED_SYNCING))
         {
-            Log.getLogger().warn("Client logged off. Resetting Pack Meta and Reloading State");
+            Log.getLogger().debug("Client logged off. Resetting Pack Meta and Reloading State");
             loadingState = ClientLoadingState.LOADING;
             StructurePacks.clearPacks();
             RenderingCache.clear();
@@ -257,12 +261,13 @@ public class ClientStructurePackLoader
     /**
      * On reception of a new structure pack.
      *
-     * @param packName the name of the structure pack.
+     * @param name the name of the structure pack.
      * @param payload the payload of the pack.
      * @param eol if last sync.
      */
-    public static void onStructurePackTransfer(final String packName, final ByteBuf payload, final boolean eol)
+    public static void onStructurePackTransfer(final String name, final ByteBuf payload, final boolean eol)
     {
+        final String packName = Utils.getSafePackName(name);
         Log.getLogger().warn("Received Structure pack from the Server: " + packName);
         IOPool.execute(() ->
         {
@@ -272,13 +277,20 @@ public class ClientStructurePackLoader
                 Log.getLogger().warn("Error trying to delete pack: ");
             }
 
+            final Path structureFolder = Minecraft.getInstance().gameDirectory.toPath().resolve(BLUEPRINT_FOLDER).normalize();
+            final Path childPath = structureFolder.resolve(packName);
+            if (Files.isSymbolicLink(childPath))
+            {
+                return;
+            }
+
+            JavaUtils.deleteDirectory(childPath);
+
             try (ZipInputStream zis = new ZipInputStream(new ByteBufInputStream(payload)))
             {
                 ZipEntry zipEntry = zis.getNextEntry();
-                final Path structureFolder = Minecraft.getInstance().gameDirectory.toPath().resolve(BLUEPRINT_FOLDER);
-                JavaUtils.deleteDirectory(structureFolder.resolve(packName));
-                final Path rootPath = Files.createDirectory(structureFolder.resolve(packName));
 
+                final Path rootPath = Files.createDirectory(childPath);
                 while (zipEntry != null)
                 {
                     boolean isDirectory = zipEntry.isDirectory();

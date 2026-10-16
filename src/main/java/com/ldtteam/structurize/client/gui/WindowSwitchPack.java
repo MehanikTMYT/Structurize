@@ -188,7 +188,7 @@ public class WindowSwitchPack extends AbstractWindowSkeleton
         // First, determine all packs
         for (final StructurePackMeta meta : packMetas)
         {
-            if (StringUtils.isBlank(filter) || StringUtils.containsIgnoreCase(meta.getName(), filter))
+            if (StringUtils.isBlank(filter) || (StringUtils.containsIgnoreCase(meta.getName(), filter) || StringUtils.containsIgnoreCase(PackNames.packText(meta.getName()), filter)))
             {
                 categories.compute(meta.getOwner(), (k, v) -> v == null ? new ArrayList<>() : v).add(meta);
             }
@@ -227,7 +227,7 @@ public class WindowSwitchPack extends AbstractWindowSkeleton
         public void render(final Pane rowPane)
         {
             rowPane.findPaneOfTypeByID("box0", Box.class).show();
-            rowPane.findPaneOfTypeByID("category", Text.class).setText(Component.literal(StringUtils.capitalize(category)));
+            rowPane.findPaneOfTypeByID("category", Text.class).setText(PackNames.category(category));
         }
     }
 
@@ -251,8 +251,8 @@ public class WindowSwitchPack extends AbstractWindowSkeleton
 
         private void fillForMeta(final Pane rowPane, final StructurePackMeta packMeta, final String side)
         {
-            rowPane.findPaneOfTypeByID("name" + side, Text.class).setText(Component.literal(packMeta.getName()));
-            rowPane.findPaneOfTypeByID("desc" + side, Text.class).setText(Component.literal(packMeta.getDesc()));
+            rowPane.findPaneOfTypeByID("name" + side, Text.class).setText(PackNames.pack(packMeta.getName()));
+            rowPane.findPaneOfTypeByID("desc" + side, Text.class).setText(PackNames.packDesc(packMeta.getName(), packMeta.getDesc()));
             rowPane.findPaneOfTypeByID("authors" + side, Text.class).setText(Component.translatable(GUI_SWITCH_PACK_AUTHORS, String.join(", ", packMeta.getAuthors())));
             if (!packMeta.getIconPath().isEmpty())
             {

@@ -234,5 +234,11 @@
   "com.ldtteam.tag.tooltip.invisible": "Скрывает схему в строительном инструменте, например для встроенных зданий или шахт",
   "com.ldtteam.structurize.gui.switchpack.authors": "Авторы: %s",
   "com.ldtteam.structurize.gui.switchpack.list.empty": "Наборы структур не найдены. Установите хотя бы один.",
-  "com.ldtteam.structurize.gui.switchpack.pack_disabled.hover_text": "Этот набор отключён, поскольку существует только на клиенте. Чтобы использовать его, сервер должен включить параметр «%s»."
+  "com.ldtteam.structurize.gui.switchpack.pack_disabled.hover_text": "Этот набор отключён, поскольку существует только на клиенте. Чтобы использовать его, сервер должен включить параметр «%s».",
+  "structurize.gui.buildtool.level": "Уровень %s",
+  "structurize.gui.shapetool.select_main_block": "Выберите основной блок",
+  "structurize.gui.scan.invalid_number": "Неверное число",
+  "structurize.pack.local.desc": "Ваш локальный набор схем — сюда попадают все ваши сканы.",
+  "structurize.pack.category.local": "Локальные",
+  "structurize.pack.category.root": "Основные"
 }

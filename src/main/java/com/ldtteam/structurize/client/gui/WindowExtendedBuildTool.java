@@ -243,17 +243,14 @@ public final class WindowExtendedBuildTool extends AbstractBlueprintManipulation
 
         if (depth.isEmpty())
         {
-            findPaneOfTypeByID("tree", Text.class).setText(Component.literal(currentStructurePack).setStyle(Style.EMPTY.withBold(true)));
+            findPaneOfTypeByID("tree", Text.class).setText(PackNames.pack(currentStructurePack).setStyle(Style.EMPTY.withBold(true)));
         }
         else
         {
-            findPaneOfTypeByID("tree", Text.class).setText(Component.literal(
-                currentStructurePack
-                  + "/"
-                  + depth
-                  + (RenderingCache.getOrCreateBlueprintPreviewData("blueprint").getBlueprint() == null
-                       ? ""
-                       : ("/" + RenderingCache.getOrCreateBlueprintPreviewData("blueprint").getBlueprint().getFileName())))
+            findPaneOfTypeByID("tree", Text.class).setText(PackNames.path(currentStructurePack, depth)
+              .append(RenderingCache.getOrCreateBlueprintPreviewData("blueprint").getBlueprint() == null
+                       ? Component.empty()
+                       : Component.literal("/").append(PackNames.blueprintFile(RenderingCache.getOrCreateBlueprintPreviewData("blueprint").getBlueprint().getFileName())))
               .setStyle(Style.EMPTY.withBold(true)));
         }
         categoryFutures = StructurePacks.getCategoriesFuture(currentStructurePack, "");
@@ -380,7 +377,7 @@ public final class WindowExtendedBuildTool extends AbstractBlueprintManipulation
                     img.setID(id);
 
                     categoryView.addChild(img);
-                    PaneBuilders.tooltipBuilder().hoverPane(img).build().setText(Component.literal(id.substring(0, 1).toUpperCase(Locale.US) + id.substring(1)));
+                    PaneBuilders.tooltipBuilder().hoverPane(img).build().setText(PackNames.folder(id));
 
                     if (category.isTerminal)
                     {
@@ -733,7 +730,7 @@ public final class WindowExtendedBuildTool extends AbstractBlueprintManipulation
             {
                 final ButtonImage button = rowPane.findPaneOfTypeByID("alternative", ButtonImage.class);
                 rowPane.findPaneOfTypeByID("id", Text.class).setText(Component.literal(depth + ":" + list.get(index).getKey()));
-                button.setText(Component.literal(list.get(index).getKey()));
+                button.setText(PackNames.variant(list.get(index).getKey()));
                 button.setTextColor(ChatFormatting.BLACK.getColor());
             }
         });
@@ -792,7 +789,7 @@ public final class WindowExtendedBuildTool extends AbstractBlueprintManipulation
                     final ButtonImage button = rowPane.findPaneOfTypeByID("level", ButtonImage.class);
                     rowPane.findPaneOfTypeByID("id", Text.class).setText(Component.literal(buttonId));
                     button.setImage(Constants.resLocStruct("textures/gui/buildtool/button_medium.png"));
-                    button.setText(Component.literal("Level: " + (index + (hasAlternatives ? 0 : 1))));
+                    button.setText(Component.translatable("structurize.gui.buildtool.level", index + (hasAlternatives ? 0 : 1)));
                     button.setTextColor(ChatFormatting.BLACK.getColor());
                 }
             }
@@ -811,7 +808,7 @@ public final class WindowExtendedBuildTool extends AbstractBlueprintManipulation
             img.setID("$back:" + buttonData.data);
             img.setVisible(true);
             img.setImage(Constants.resLocStruct("textures/gui/buildtool/back_medium.png"));
-            PaneBuilders.tooltipBuilder().hoverPane(img).build().setText(Component.literal("back"));
+            PaneBuilders.tooltipBuilder().hoverPane(img).build().setText(Component.translatable("gui.back"));
         }
         else if (buttonData.type == ButtonType.Blueprint)
         {
@@ -840,8 +837,8 @@ public final class WindowExtendedBuildTool extends AbstractBlueprintManipulation
             else
             {
                 final String name = getCustomName(firstBlueprint, firstBlueprint.getFileName());
-                img.setText(Component.literal(name));
-                toolTip.add(Component.literal(name));
+                img.setText(PackNames.blueprintFile(name));
+                toolTip.add(PackNames.blueprintFile(name));
             }
             img.setVisible(true);
             boolean allInvis = true;
@@ -917,7 +914,7 @@ public final class WindowExtendedBuildTool extends AbstractBlueprintManipulation
             img.setID("$back:" + buttonData.data);
             img.setVisible(true);
             img.setImage(Constants.resLocStruct("textures/gui/buildtool/back_medium.png"));
-            PaneBuilders.tooltipBuilder().hoverPane(img).build().setText(Component.literal("back"));
+            PaneBuilders.tooltipBuilder().hoverPane(img).build().setText(Component.translatable("gui.back"));
             return;
         }
 
@@ -930,9 +927,7 @@ public final class WindowExtendedBuildTool extends AbstractBlueprintManipulation
         }
 
         img.setID(id);
-        String descString = id.split("/")[id.split("/").length - 1];
-        descString = descString.substring(0, 1).toUpperCase(Locale.US) + descString.substring(1);
-        final Component desc = Component.literal(descString);
+        final Component desc = PackNames.folder(id.split("/")[id.split("/").length - 1]);
         img.setText(desc);
         img.setVisible(true);
         img.setTextColor(ChatFormatting.BLACK.getColor());
@@ -961,7 +956,7 @@ public final class WindowExtendedBuildTool extends AbstractBlueprintManipulation
                     pane.enable();
                 }
             }
-            findPaneOfTypeByID("tree", Text.class).setText(Component.literal(currentStructurePack + "/" + nextDepth).setStyle(Style.EMPTY.withBold(true)));
+            findPaneOfTypeByID("tree", Text.class).setText(PackNames.path(currentStructurePack, nextDepth).setStyle(Style.EMPTY.withBold(true)));
             button.setHoverPane(null);
             handled = true;
         }
@@ -977,7 +972,7 @@ public final class WindowExtendedBuildTool extends AbstractBlueprintManipulation
             updateFolders(Collections.emptyList(), null);
             updateBlueprints(Collections.emptyList(), "");
             depth = nextDepth;
-            findPaneOfTypeByID("tree", Text.class).setText(Component.literal(currentStructurePack + "/" + nextDepth).setStyle(Style.EMPTY.withBold(true)));
+            findPaneOfTypeByID("tree", Text.class).setText(PackNames.path(currentStructurePack, nextDepth).setStyle(Style.EMPTY.withBold(true)));
             if (nextDepth.contains("/"))
             {
                 button.setHoverPane(null);
@@ -998,7 +993,7 @@ public final class WindowExtendedBuildTool extends AbstractBlueprintManipulation
             updateFolders(Collections.emptyList(), null);
             updateBlueprints(Collections.emptyList(), "");
             depth = nextDepth;
-            findPaneOfTypeByID("tree", Text.class).setText(Component.literal(currentStructurePack + "/" + nextDepth).setStyle(Style.EMPTY.withBold(true)));
+            findPaneOfTypeByID("tree", Text.class).setText(PackNames.path(currentStructurePack, nextDepth).setStyle(Style.EMPTY.withBold(true)));
             if (nextDepth.contains("/"))
             {
                 button.setHoverPane(null);
@@ -1140,7 +1135,7 @@ public final class WindowExtendedBuildTool extends AbstractBlueprintManipulation
     {
         final BlueprintPreviewData data = RenderingCache.getOrCreateBlueprintPreviewData("blueprint");
 
-        findPaneOfTypeByID("tree", Text.class).setText(Component.literal(currentStructurePack + "/" + depth + "/" + blueprint.getFileName()).setStyle(Style.EMPTY.withBold(true)));
+        findPaneOfTypeByID("tree", Text.class).setText(PackNames.path(currentStructurePack, depth).append("/").append(PackNames.blueprintFile(blueprint.getFileName())).setStyle(Style.EMPTY.withBold(true)));
         data.setBlueprint(blueprint);
         adjustToGroundOffset();
         selectedBlueprint = blueprint;

@@ -269,7 +269,7 @@ public class WindowShapeTool extends AbstractBlueprintManipulationWindow
     private void pickMainBlock()
     {
         new WindowSelectRes(this,
-            Component.literal("Select the main block"),
+            Component.translatable("structurize.gui.shapetool.select_main_block"),
             mainBlock,
             ItemUtil.getAllItemsInlcudingInventory(),
             (s, c) -> updateBlock(s, true),
@@ -283,7 +283,7 @@ public class WindowShapeTool extends AbstractBlueprintManipulationWindow
     private void pickFillBlock()
     {
         new WindowSelectRes(this,
-            Component.literal("Select the main block"),
+            Component.translatable("structurize.gui.shapetool.select_main_block"),
             secondaryBlock,
             ItemUtil.getAllItemsInlcudingInventory(),
             (s, c) -> updateBlock(s, false),

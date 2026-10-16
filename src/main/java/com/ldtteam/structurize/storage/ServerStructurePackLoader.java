@@ -67,10 +67,9 @@ public class ServerStructurePackLoader
         final List<String> modList = new ArrayList<>();
         for (IModInfo mod : ModList.get().getMods())
         {
-            // PORT-26.1.2: IModFile#findResource(String...) was removed; resolve the same "<contentRoot>/blueprints/<modid>"
-            // path manually against the mod's own content root(s) instead. See PORT_26.1.2.md.
-            mod.getOwningFile().getFile().getContents().getContentRoots().stream().findFirst()
-                .ifPresent(contentRoot -> modPaths.add(contentRoot.resolve(BLUEPRINT_FOLDER).resolve(mod.getModId())));
+            // PORT-26.1.2: IModFile#findResource(String...) was removed; ModBlueprintPaths resolves "blueprints/<modid>"
+            // in directory content roots and inside mod jars. See PORT_26.1.2.md.
+            ModBlueprintPaths.find(mod).ifPresent(modPaths::add);
             modList.add(mod.getModId());
         }
 
@@ -83,6 +82,11 @@ public class ServerStructurePackLoader
                 // This loads from the jar
                 for (final Path modPath : modPaths)
                 {
+                    if (!Files.isDirectory(modPath))
+                    {
+                        continue;
+                    }
+
                     try
                     {
                         try (final Stream<Path> paths = Files.list(modPath))
@@ -135,7 +139,7 @@ public class ServerStructurePackLoader
                     Log.getLogger().warn("Failed loading client packs from main folder path: " + gameFolder);
                 }
 
-                Log.getLogger().warn("Finished discovering Server Structure packs");
+                Log.getLogger().info("Finished discovering Server Structure packs");
 
                 for (final StructurePackMeta pack : StructurePacks.getPackMetas())
                 {
